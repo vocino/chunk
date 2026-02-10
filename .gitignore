@@ -1,1 +1,10 @@
 .worktrees/
+
+# Claude Code settings
+.claude/
+
+# Flutter build artifacts
+.dart_tool/
+
+# Temporary files
+nul
