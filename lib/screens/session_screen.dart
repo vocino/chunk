@@ -21,13 +21,40 @@ class _SessionScreenState extends State<SessionScreen> {
   final PageController _pageController = PageController();
   final List<SessionStep> _steps = [SessionStep(StepType.start)];
   int _currentStepIndex = 0;
+  bool _isTransitioning = false;
 
-  void _advance() {
-    if (_pageController.page?.round() != _currentStepIndex) return;
-    _handleForwardTransition(_currentStepIndex);
+  @override
+  void initState() {
+    super.initState();
+    _pageController.addListener(_onScroll);
   }
 
-  void _handleForwardTransition(int fromIndex) {
+  void _onScroll() {
+    if (_isTransitioning) return;
+    final page = _pageController.page;
+    if (page == null) return;
+
+    // User is swiping forward past the current step
+    if (page > _currentStepIndex + 0.15) {
+      _isTransitioning = true;
+      _createNextStep(_currentStepIndex);
+    }
+  }
+
+  void _advance() {
+    if (_isTransitioning) return;
+    final currentPage = _pageController.page?.round();
+    if (currentPage != _currentStepIndex) return;
+
+    _isTransitioning = true;
+    _createNextStep(_currentStepIndex);
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _createNextStep(int fromIndex) {
     final fromStep = _steps[fromIndex];
     final timerService = context.read<TimerService>();
     final sessionState = context.read<SessionState>();
@@ -71,28 +98,15 @@ class _SessionScreenState extends State<SessionScreen> {
 
       _currentStepIndex = _steps.length - 1;
     });
-
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-    );
   }
 
   void _onPageChanged(int index) {
-    // Only handle forward transitions beyond what we've seen
-    if (index > _currentStepIndex) {
-      // This shouldn't happen since itemCount limits it,
-      // but guard against it
-      _pageController.animateToPage(
-        _currentStepIndex,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
-    }
+    _isTransitioning = false;
   }
 
   @override
   void dispose() {
+    _pageController.removeListener(_onScroll);
     _pageController.dispose();
     super.dispose();
   }
@@ -104,9 +118,14 @@ class _SessionScreenState extends State<SessionScreen> {
         controller: _pageController,
         scrollDirection: Axis.vertical,
         physics: const PageScrollPhysics(),
-        itemCount: _currentStepIndex + 1,
+        itemCount: _currentStepIndex + 2,
         onPageChanged: _onPageChanged,
-        itemBuilder: (context, index) => _buildCard(_steps[index], index),
+        itemBuilder: (context, index) {
+          if (index >= _steps.length) {
+            return const SizedBox.shrink();
+          }
+          return _buildCard(_steps[index], index);
+        },
       ),
     );
   }
