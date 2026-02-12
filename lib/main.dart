@@ -4,7 +4,7 @@ import 'models/session_state.dart';
 import 'services/timer_service.dart';
 import 'services/activity_service.dart';
 import 'theme/app_theme.dart';
-import 'screens/start_screen.dart';
+import 'screens/session_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Chunk',
         theme: AppTheme.darkTheme,
-        home: const StartScreen(),
+        home: const SessionScreen(),
         debugShowCheckedModeBanner: false,
       ),
     );

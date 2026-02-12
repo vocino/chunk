@@ -11,7 +11,7 @@ import 'package:chunk/main.dart';
 import 'package:chunk/services/activity_service.dart';
 
 void main() {
-  testWidgets('App launches with Start screen', (WidgetTester tester) async {
+  testWidgets('App launches with start card', (WidgetTester tester) async {
     // Create activity service
     final activityService = ActivityService();
     await activityService.loadActivities();
@@ -19,7 +19,7 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp(activityService: activityService));
 
-    // Verify that the Start screen is displayed.
-    expect(find.text('Start'), findsOneWidget);
+    // Verify that the start card is displayed with "Ready?" heading.
+    expect(find.text('Ready?'), findsOneWidget);
   });
 }
