@@ -139,10 +139,10 @@ class _SessionScreenState extends State<SessionScreen> {
               ),
             ),
             const Spacer(),
-            const Text(
+            Text(
               'Ready?',
               textAlign: TextAlign.center,
-              style: AppTheme.headingLarge,
+              style: AppTheme.headingLarge.copyWith(color: AppTheme.purple),
             ),
             const Spacer(),
             AdvanceArrow(label: 'start', onTap: _advance),
@@ -158,12 +158,9 @@ class _SessionScreenState extends State<SessionScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Spacer(),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: const BreathingCircle(),
+            const Expanded(
+              child: BreathingCircle(),
             ),
-            const Spacer(),
             AdvanceArrow(label: 'finished', onTap: _advance),
           ],
         ),
@@ -183,22 +180,25 @@ class _SessionScreenState extends State<SessionScreen> {
         child: Column(
           children: [
             const Spacer(),
-            const Text(
+            Text(
               'That took',
-              style: AppTheme.bodyLarge,
+              style: AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               formattedTime,
-              style: AppTheme.headingLarge,
+              style: AppTheme.headingLarge.copyWith(
+                fontSize: 72,
+                color: AppTheme.green,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             if (!shouldBreak)
               Text(
-                '${step.questionsUntilBreak}/5 until break',
-                style: AppTheme.bodyLarge,
+                '${step.questionsUntilBreak} more until break',
+                style: AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
                 textAlign: TextAlign.center,
               ),
             const Spacer(),
@@ -265,15 +265,15 @@ class _BreakCardState extends State<_BreakCard> {
         padding: const EdgeInsets.all(32),
         child: Column(
           children: [
-            const Spacer(flex: 1),
+            const Spacer(),
             Text(
               'Break time!',
-              style: AppTheme.headingMedium,
+              style: AppTheme.headingMedium.copyWith(color: AppTheme.pink),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 48),
             Text(
-              '${_remainingSeconds}s',
+              '$_remainingSeconds',
               style: AppTheme.headingLarge.copyWith(
                 fontSize: 72,
                 color: AppTheme.cyan,
@@ -283,7 +283,10 @@ class _BreakCardState extends State<_BreakCard> {
             const SizedBox(height: 48),
             Text(
               'How about:',
-              style: AppTheme.bodyLarge.copyWith(fontSize: 20),
+              style: AppTheme.bodyLarge.copyWith(
+                fontSize: 20,
+                color: AppTheme.comment,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -292,13 +295,11 @@ class _BreakCardState extends State<_BreakCard> {
               style: AppTheme.headingMedium.copyWith(fontSize: 28),
               textAlign: TextAlign.center,
             ),
-            const Spacer(flex: 2),
-            if (_remainingSeconds <= 3 && _remainingSeconds > 0)
-              AdvanceArrow(
-                label: 'back to work',
-                onTap: widget.onComplete,
-              ),
-            const Spacer(flex: 1),
+            const Spacer(),
+            AdvanceArrow(
+              label: 'back to work',
+              onTap: widget.onComplete,
+            ),
           ],
         ),
       ),

@@ -18,29 +18,23 @@ class AppTheme {
   // Text Styles
   static const TextStyle headingLarge = TextStyle(
     fontSize: 48,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w300,
     color: foreground,
     height: 1.2,
   );
 
   static const TextStyle headingMedium = TextStyle(
     fontSize: 32,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w400,
     color: foreground,
     height: 1.3,
   );
 
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.w400,
+    fontWeight: FontWeight.w300,
     color: foreground,
     height: 1.4,
-  );
-
-  static const TextStyle buttonText = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.w600,
-    color: background,
   );
 
   // Button Style
