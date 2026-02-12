@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'models/session_state.dart';
 import 'services/timer_service.dart';
 import 'services/activity_service.dart';
+import 'services/sound_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/session_screen.dart';
 
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SessionState()),
         ChangeNotifierProvider(create: (_) => TimerService()),
         Provider.value(value: activityService),
+        Provider(create: (_) => SoundService()),
       ],
       child: MaterialApp(
         title: 'Chunk',

@@ -5,6 +5,7 @@ import '../models/session_state.dart';
 import '../models/session_step.dart';
 import '../services/timer_service.dart';
 import '../services/activity_service.dart';
+import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/advance_arrow.dart';
 import '../widgets/breathing_circle.dart';
@@ -246,6 +247,7 @@ class _BreakCardState extends State<_BreakCard> {
           _remainingSeconds--;
         } else {
           _countdownTimer?.cancel();
+          context.read<SoundService>().playDing();
           widget.onComplete();
         }
       });
