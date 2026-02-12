@@ -83,7 +83,7 @@ class _BreakScreenState extends State<BreakScreen> {
                 '${_remainingSeconds}s',
                 style: AppTheme.headingLarge.copyWith(
                   fontSize: 72,
-                  color: AppTheme.primaryBlue,
+                  color: AppTheme.cyan,
                 ),
                 textAlign: TextAlign.center,
               ),

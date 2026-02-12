@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Chunk',
-        theme: AppTheme.lightTheme,
+        theme: AppTheme.darkTheme,
         home: const StartScreen(),
         debugShowCheckedModeBanner: false,
       ),
