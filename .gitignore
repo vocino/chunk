@@ -1,10 +1,27 @@
-.worktrees/
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.dart_tool
+
+# IDE
+*.iml
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# DevTools
+devtools_options.yaml
 
 # Claude Code settings
 .claude/
 
-# Flutter build artifacts
-.dart_tool/
-
-# Temporary files
-nul
+# Worktrees
+.worktrees/
