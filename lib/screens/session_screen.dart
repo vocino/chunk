@@ -127,7 +127,33 @@ class _SessionScreenState extends State<SessionScreen> {
             if (index >= _steps.length) {
               return const SizedBox.shrink();
             }
-            return _buildCard(_steps[index], index);
+            final child = _buildCard(_steps[index], index);
+            return AnimatedBuilder(
+              animation: _pageController,
+              builder: (context, child) {
+                double pageOffset = 0;
+                if (_pageController.hasClients) {
+                  pageOffset =
+                      (_pageController.page ?? index.toDouble()) - index;
+                }
+
+                // Outgoing card: fade out and shift up slightly for parallax
+                if (pageOffset > 0) {
+                  final opacity = (1 - pageOffset * 0.6).clamp(0.0, 1.0);
+                  final translateY = pageOffset * -40;
+                  return Opacity(
+                    opacity: opacity,
+                    child: Transform.translate(
+                      offset: Offset(0, translateY),
+                      child: child,
+                    ),
+                  );
+                }
+
+                return child!;
+              },
+              child: child,
+            );
           },
         ),
       ),
@@ -198,41 +224,11 @@ class _SessionScreenState extends State<SessionScreen> {
     final formattedTime = timerService.formatElapsed(step.elapsedSeconds ?? 0);
     final shouldBreak = sessionState.shouldTriggerBreak();
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const Spacer(),
-            Text(
-              'That took',
-              style: AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              formattedTime,
-              style: AppTheme.headingLarge.copyWith(
-                fontSize: 72,
-                color: AppTheme.green,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            if (!shouldBreak)
-              Text(
-                '${step.questionsUntilBreak} more until break',
-                style: AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
-                textAlign: TextAlign.center,
-              ),
-            const Spacer(),
-            AdvanceArrow(
-              label: shouldBreak ? 'break time' : 'ready',
-              onTap: _advance,
-            ),
-          ],
-        ),
-      ),
+    return _CompletionCard(
+      formattedTime: formattedTime,
+      shouldBreak: shouldBreak,
+      questionsUntilBreak: step.questionsUntilBreak ?? 0,
+      onAdvance: _advance,
     );
   }
 
@@ -240,6 +236,154 @@ class _SessionScreenState extends State<SessionScreen> {
     return _BreakCard(
       activity: step.activity!,
       onComplete: _advance,
+    );
+  }
+}
+
+class _CompletionCard extends StatefulWidget {
+  final String formattedTime;
+  final bool shouldBreak;
+  final int questionsUntilBreak;
+  final VoidCallback onAdvance;
+
+  const _CompletionCard({
+    required this.formattedTime,
+    required this.shouldBreak,
+    required this.questionsUntilBreak,
+    required this.onAdvance,
+  });
+
+  @override
+  State<_CompletionCard> createState() => _CompletionCardState();
+}
+
+class _CompletionCardState extends State<_CompletionCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  late Animation<double> _labelOpacity;
+  late Animation<double> _timeOpacity;
+  late Animation<double> _timeScale;
+  late Animation<double> _counterOpacity;
+  late Animation<Offset> _counterSlide;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // "That took" label fades in first (0–300ms)
+    _labelOpacity = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _revealController,
+        curve: const Interval(0, 0.375, curve: Curves.easeOut),
+      ),
+    );
+
+    // Time fades in and scales up (150–600ms)
+    _timeOpacity = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _revealController,
+        curve: const Interval(0.1875, 0.75, curve: Curves.easeOut),
+      ),
+    );
+
+    _timeScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _revealController,
+        curve: const Interval(0.1875, 0.75, curve: Curves.easeOutBack),
+      ),
+    );
+
+    // Progress counter slides up and fades in (400–800ms)
+    _counterOpacity = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _revealController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _counterSlide = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _revealController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _revealController.forward();
+  }
+
+  @override
+  void dispose() {
+    _revealController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Spacer(),
+            FadeTransition(
+              opacity: _labelOpacity,
+              child: Text(
+                'That took',
+                style: AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 8),
+            AnimatedBuilder(
+              animation: _revealController,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _timeOpacity.value,
+                  child: Transform.scale(
+                    scale: _timeScale.value,
+                    child: child,
+                  ),
+                );
+              },
+              child: Text(
+                widget.formattedTime,
+                style: AppTheme.headingLarge.copyWith(
+                  fontSize: 72,
+                  color: AppTheme.green,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 32),
+            if (!widget.shouldBreak)
+              SlideTransition(
+                position: _counterSlide,
+                child: FadeTransition(
+                  opacity: _counterOpacity,
+                  child: Text(
+                    '${widget.questionsUntilBreak} more until break',
+                    style:
+                        AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            const Spacer(),
+            AdvanceArrow(
+              label: widget.shouldBreak ? 'break time' : 'ready',
+              onTap: widget.onAdvance,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

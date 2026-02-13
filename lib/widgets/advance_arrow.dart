@@ -16,9 +16,11 @@ class AdvanceArrow extends StatefulWidget {
 }
 
 class _AdvanceArrowState extends State<AdvanceArrow>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _bounceController;
   late Animation<Offset> _bounceAnimation;
+  late AnimationController _tapController;
+  late Animation<double> _tapScale;
 
   @override
   void initState() {
@@ -37,41 +39,69 @@ class _AdvanceArrowState extends State<AdvanceArrow>
         .animate(_bounceController);
 
     _bounceController.repeat(reverse: true);
+
+    _tapController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+
+    _tapScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.85)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 0.85, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+    ]).animate(_tapController);
+  }
+
+  void _handleTap() {
+    _tapController.forward(from: 0).then((_) {
+      widget.onTap();
+    });
   }
 
   @override
   void dispose() {
     _bounceController.dispose();
+    _tapController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: _handleTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: SlideTransition(
-          position: _bounceAnimation,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: AppTheme.comment,
+        child: ScaleTransition(
+          scale: _tapScale,
+          child: SlideTransition(
+            position: _bounceAnimation,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: AppTheme.comment,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Icon(
-                Icons.keyboard_arrow_down,
-                size: 32,
-                color: AppTheme.foreground,
-              ),
-            ],
+                const SizedBox(height: 4),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 32,
+                  color: AppTheme.foreground,
+                ),
+              ],
+            ),
           ),
         ),
       ),
