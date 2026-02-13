@@ -114,18 +114,22 @@ class _SessionScreenState extends State<SessionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        physics: const PageScrollPhysics(),
-        itemCount: _currentStepIndex + 2,
-        onPageChanged: _onPageChanged,
-        itemBuilder: (context, index) {
-          if (index >= _steps.length) {
-            return const SizedBox.shrink();
-          }
-          return _buildCard(_steps[index], index);
-        },
+      backgroundColor: AppTheme.background,
+      body: Container(
+        color: AppTheme.background,
+        child: PageView.builder(
+          controller: _pageController,
+          scrollDirection: Axis.vertical,
+          physics: const PageScrollPhysics(),
+          itemCount: _currentStepIndex + 2,
+          onPageChanged: _onPageChanged,
+          itemBuilder: (context, index) {
+            if (index >= _steps.length) {
+              return const SizedBox.shrink();
+            }
+            return _buildCard(_steps[index], index);
+          },
+        ),
       ),
     );
   }
