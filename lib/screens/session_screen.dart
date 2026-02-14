@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/session_state.dart';
 import '../models/session_step.dart';
@@ -9,6 +10,7 @@ import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/advance_arrow.dart';
 import '../widgets/ambient_background.dart';
+import '../widgets/break_timer_selector.dart';
 import '../widgets/breathing_circle.dart';
 import '../widgets/glass_container.dart';
 
@@ -104,6 +106,16 @@ class _SessionScreenState extends State<SessionScreen> {
 
   void _onPageChanged(int index) {
     _isTransitioning = false;
+    if (index < _steps.length) {
+      HapticFeedback.mediumImpact();
+      final step = _steps[index];
+      final soundService = context.read<SoundService>();
+      if (step.type == StepType.completion) {
+        soundService.playPop();
+      } else if (step.type == StepType.break_) {
+        soundService.playChime();
+      }
+    }
   }
 
   @override
@@ -182,28 +194,39 @@ class _SessionScreenState extends State<SessionScreen> {
   }
 
   Widget _buildStartCard(int index) {
+    final sessionState = context.watch<SessionState>();
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: IconButton(
-                icon: const Icon(Icons.settings, size: 32),
-                onPressed: () {
-                  // TODO: Navigate to settings
-                },
-              ),
-            ),
             const Spacer(),
             Text(
               'Ready?',
               textAlign: TextAlign.center,
-              style: AppTheme.headingLarge.copyWith(color: AppTheme.purple),
+              style: AppTheme.headingLarge(context).copyWith(color: AppTheme.purple),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'break time',
+              style: TextStyle(
+                fontSize: 14 * AppTheme.scaleFactor(context),
+                fontWeight: FontWeight.w400,
+                color: AppTheme.comment,
+              ),
+            ),
+            const SizedBox(height: 12),
+            BreakTimerSelector(
+              selectedDuration: sessionState.breakDuration,
+              onChanged: (d) => sessionState.setBreakDuration(d),
             ),
             const Spacer(),
-            AdvanceArrow(label: 'start', onTap: _advance),
+            AdvanceArrow(
+              label: 'swipe to start',
+              onTap: _advance,
+              enlarged: true,
+            ),
           ],
         ),
       ),
@@ -352,7 +375,7 @@ class _CompletionCardState extends State<_CompletionCard>
                     child: Text(
                       'That took',
                       style:
-                          AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
+                          AppTheme.bodyLarge(context).copyWith(color: AppTheme.comment),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -370,8 +393,8 @@ class _CompletionCardState extends State<_CompletionCard>
                     },
                     child: Text(
                       widget.formattedTime,
-                      style: AppTheme.headingLarge.copyWith(
-                        fontSize: 72,
+                      style: AppTheme.headingLarge(context).copyWith(
+                        fontSize: 72 * AppTheme.scaleFactor(context),
                         color: AppTheme.green,
                       ),
                       textAlign: TextAlign.center,
@@ -385,7 +408,7 @@ class _CompletionCardState extends State<_CompletionCard>
                         opacity: _counterOpacity,
                         child: Text(
                           '${widget.questionsUntilBreak} more until break',
-                          style: AppTheme.bodyLarge
+                          style: AppTheme.bodyLarge(context)
                               .copyWith(color: AppTheme.comment),
                           textAlign: TextAlign.center,
                         ),
@@ -420,12 +443,13 @@ class _BreakCard extends StatefulWidget {
 }
 
 class _BreakCardState extends State<_BreakCard> {
-  int _remainingSeconds = 60;
+  late int _remainingSeconds;
   Timer? _countdownTimer;
 
   @override
   void initState() {
     super.initState();
+    _remainingSeconds = context.read<SessionState>().breakDuration;
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_remainingSeconds > 0) {
@@ -462,14 +486,14 @@ class _BreakCardState extends State<_BreakCard> {
                   Text(
                     'Break time!',
                     style:
-                        AppTheme.headingMedium.copyWith(color: AppTheme.pink),
+                        AppTheme.headingMedium(context).copyWith(color: AppTheme.pink),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
                   Text(
                     '$_remainingSeconds',
-                    style: AppTheme.headingLarge.copyWith(
-                      fontSize: 72,
+                    style: AppTheme.headingLarge(context).copyWith(
+                      fontSize: 72 * AppTheme.scaleFactor(context),
                       color: AppTheme.cyan,
                     ),
                     textAlign: TextAlign.center,
@@ -477,8 +501,8 @@ class _BreakCardState extends State<_BreakCard> {
                   const SizedBox(height: 48),
                   Text(
                     'How about:',
-                    style: AppTheme.bodyLarge.copyWith(
-                      fontSize: 20,
+                    style: AppTheme.bodyLarge(context).copyWith(
+                      fontSize: 20 * AppTheme.scaleFactor(context),
                       color: AppTheme.comment,
                     ),
                     textAlign: TextAlign.center,
@@ -486,7 +510,9 @@ class _BreakCardState extends State<_BreakCard> {
                   const SizedBox(height: 16),
                   Text(
                     '${widget.activity.emoji} ${widget.activity.text}',
-                    style: AppTheme.headingMedium.copyWith(fontSize: 28),
+                    style: AppTheme.headingMedium(context).copyWith(
+                      fontSize: 28 * AppTheme.scaleFactor(context),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],

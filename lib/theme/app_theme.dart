@@ -15,27 +15,43 @@ class AppTheme {
   static const Color purple = Color(0xFFBD93F9);
   static const Color pink = Color(0xFFFF79C6);
 
-  // Text Styles
-  static const TextStyle headingLarge = TextStyle(
+  // Responsive scaling
+  static double scaleFactor(BuildContext context) {
+    final shortestSide = MediaQuery.of(context).size.shortestSide;
+    return (shortestSide / 390).clamp(0.85, 1.6);
+  }
+
+  // Base text styles (unscaled, for ThemeData)
+  static const TextStyle _headingLarge = TextStyle(
     fontSize: 48,
     fontWeight: FontWeight.w300,
     color: foreground,
     height: 1.2,
   );
 
-  static const TextStyle headingMedium = TextStyle(
+  static const TextStyle _headingMedium = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w400,
     color: foreground,
     height: 1.3,
   );
 
-  static const TextStyle bodyLarge = TextStyle(
+  static const TextStyle _bodyLarge = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w300,
     color: foreground,
     height: 1.4,
   );
+
+  // Responsive text styles
+  static TextStyle headingLarge(BuildContext context) =>
+      _headingLarge.copyWith(fontSize: 48 * scaleFactor(context));
+
+  static TextStyle headingMedium(BuildContext context) =>
+      _headingMedium.copyWith(fontSize: 32 * scaleFactor(context));
+
+  static TextStyle bodyLarge(BuildContext context) =>
+      _bodyLarge.copyWith(fontSize: 24 * scaleFactor(context));
 
   // Button Style
   static final ButtonStyle primaryButtonStyle = ButtonStyle(
@@ -76,9 +92,9 @@ class AppTheme {
       fontFamily: 'Roboto',
       iconTheme: const IconThemeData(color: comment),
       textTheme: const TextTheme(
-        displayLarge: headingLarge,
-        displayMedium: headingMedium,
-        bodyLarge: bodyLarge,
+        displayLarge: _headingLarge,
+        displayMedium: _headingMedium,
+        bodyLarge: _bodyLarge,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: primaryButtonStyle,

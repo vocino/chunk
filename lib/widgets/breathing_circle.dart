@@ -58,19 +58,35 @@ class _BreathingCircleState extends State<BreathingCircle>
       ),
     ];
 
-    // 10-second breath cycle (5s inhale, 5s exhale)
+    // 19-second 4-7-8 breath cycle (4s inhale, 7s hold, 8s exhale)
     _breathController = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 19),
       vsync: this,
     );
 
-    _breathAnimation = Tween<double>(begin: 0.0, end: 1.0)
-        .chain(CurveTween(curve: Curves.ease))
-        .animate(_breathController);
+    _breathAnimation = TweenSequence<double>([
+      // Inhale: 4s — expand 0→1
+      TweenSequenceItem(
+        tween: Tween(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 4,
+      ),
+      // Hold: 7s — stay at 1
+      TweenSequenceItem(
+        tween: ConstantTween(1.0),
+        weight: 7,
+      ),
+      // Exhale: 8s — contract 1→0
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 8,
+      ),
+    ]).animate(_breathController);
 
     // Slow drift for gentle circle wandering
     _driftController = AnimationController(
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 7),
       vsync: this,
     );
 
@@ -78,7 +94,7 @@ class _BreathingCircleState extends State<BreathingCircle>
         .chain(CurveTween(curve: Curves.easeInOut))
         .animate(_driftController);
 
-    _breathController.repeat(reverse: true);
+    _breathController.repeat();
     _driftController.repeat(reverse: true);
   }
 

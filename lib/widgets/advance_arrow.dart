@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 
 class AdvanceArrow extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
+  final bool enlarged;
 
   const AdvanceArrow({
     super.key,
     required this.label,
     required this.onTap,
+    this.enlarged = false,
   });
 
   @override
@@ -33,7 +36,7 @@ class _AdvanceArrowState extends State<AdvanceArrow>
 
     _bounceAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0, 0.15),
+      end: Offset(0, widget.enlarged ? 0.2 : 0.15),
     )
         .chain(CurveTween(curve: Curves.easeInOut))
         .animate(_bounceController);
@@ -60,6 +63,7 @@ class _AdvanceArrowState extends State<AdvanceArrow>
   }
 
   void _handleTap() {
+    HapticFeedback.lightImpact();
     _tapController.forward(from: 0).then((_) {
       widget.onTap();
     });
@@ -89,7 +93,7 @@ class _AdvanceArrowState extends State<AdvanceArrow>
                 Text(
                   widget.label,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: (widget.enlarged ? 18 : 14) * AppTheme.scaleFactor(context),
                     fontWeight: FontWeight.w400,
                     color: AppTheme.comment,
                     shadows: [
@@ -103,7 +107,7 @@ class _AdvanceArrowState extends State<AdvanceArrow>
                 const SizedBox(height: 4),
                 Icon(
                   Icons.keyboard_arrow_down,
-                  size: 32,
+                  size: (widget.enlarged ? 48 : 32) * AppTheme.scaleFactor(context),
                   color: AppTheme.foreground,
                   shadows: [
                     Shadow(
