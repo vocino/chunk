@@ -8,7 +8,9 @@ import '../services/activity_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/advance_arrow.dart';
+import '../widgets/ambient_background.dart';
 import '../widgets/breathing_circle.dart';
+import '../widgets/glass_container.dart';
 
 class SessionScreen extends StatefulWidget {
   const SessionScreen({super.key});
@@ -115,47 +117,53 @@ class _SessionScreenState extends State<SessionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: Container(
-        color: AppTheme.background,
-        child: PageView.builder(
-          controller: _pageController,
-          scrollDirection: Axis.vertical,
-          physics: const PageScrollPhysics(),
-          itemCount: _currentStepIndex + 2,
-          onPageChanged: _onPageChanged,
-          itemBuilder: (context, index) {
-            if (index >= _steps.length) {
-              return const SizedBox.shrink();
-            }
-            final child = _buildCard(_steps[index], index);
-            return AnimatedBuilder(
-              animation: _pageController,
-              builder: (context, child) {
-                double pageOffset = 0;
-                if (_pageController.hasClients) {
-                  pageOffset =
-                      (_pageController.page ?? index.toDouble()) - index;
+      body: Stack(
+        children: [
+          const RepaintBoundary(
+            child: AmbientBackground(),
+          ),
+          RepaintBoundary(
+            child: PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              physics: const PageScrollPhysics(),
+              itemCount: _currentStepIndex + 2,
+              onPageChanged: _onPageChanged,
+              itemBuilder: (context, index) {
+                if (index >= _steps.length) {
+                  return const SizedBox.shrink();
                 }
+                final child = _buildCard(_steps[index], index);
+                return AnimatedBuilder(
+                  animation: _pageController,
+                  builder: (context, child) {
+                    double pageOffset = 0;
+                    if (_pageController.hasClients) {
+                      pageOffset =
+                          (_pageController.page ?? index.toDouble()) - index;
+                    }
 
-                // Outgoing card: fade out and shift up slightly for parallax
-                if (pageOffset > 0) {
-                  final opacity = (1 - pageOffset * 0.6).clamp(0.0, 1.0);
-                  final translateY = pageOffset * -40;
-                  return Opacity(
-                    opacity: opacity,
-                    child: Transform.translate(
-                      offset: Offset(0, translateY),
-                      child: child,
-                    ),
-                  );
-                }
+                    // Outgoing card: fade out and shift up slightly for parallax
+                    if (pageOffset > 0) {
+                      final opacity = (1 - pageOffset * 0.6).clamp(0.0, 1.0);
+                      final translateY = pageOffset * -40;
+                      return Opacity(
+                        opacity: opacity,
+                        child: Transform.translate(
+                          offset: Offset(0, translateY),
+                          child: child,
+                        ),
+                      );
+                    }
 
-                return child!;
+                    return child!;
+                  },
+                  child: child,
+                );
               },
-              child: child,
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -333,49 +341,59 @@ class _CompletionCardState extends State<_CompletionCard>
         child: Column(
           children: [
             const Spacer(),
-            FadeTransition(
-              opacity: _labelOpacity,
-              child: Text(
-                'That took',
-                style: AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
-                textAlign: TextAlign.center,
+            GlassContainer(
+              glowColor: AppTheme.green,
+              fillOpacity: 0.10,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FadeTransition(
+                    opacity: _labelOpacity,
+                    child: Text(
+                      'That took',
+                      style:
+                          AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  AnimatedBuilder(
+                    animation: _revealController,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: _timeOpacity.value,
+                        child: Transform.scale(
+                          scale: _timeScale.value,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Text(
+                      widget.formattedTime,
+                      style: AppTheme.headingLarge.copyWith(
+                        fontSize: 72,
+                        color: AppTheme.green,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  if (!widget.shouldBreak)
+                    SlideTransition(
+                      position: _counterSlide,
+                      child: FadeTransition(
+                        opacity: _counterOpacity,
+                        child: Text(
+                          '${widget.questionsUntilBreak} more until break',
+                          style: AppTheme.bodyLarge
+                              .copyWith(color: AppTheme.comment),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            AnimatedBuilder(
-              animation: _revealController,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _timeOpacity.value,
-                  child: Transform.scale(
-                    scale: _timeScale.value,
-                    child: child,
-                  ),
-                );
-              },
-              child: Text(
-                widget.formattedTime,
-                style: AppTheme.headingLarge.copyWith(
-                  fontSize: 72,
-                  color: AppTheme.green,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 32),
-            if (!widget.shouldBreak)
-              SlideTransition(
-                position: _counterSlide,
-                child: FadeTransition(
-                  opacity: _counterOpacity,
-                  child: Text(
-                    '${widget.questionsUntilBreak} more until break',
-                    style:
-                        AppTheme.bodyLarge.copyWith(color: AppTheme.comment),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
             const Spacer(),
             AdvanceArrow(
               label: widget.shouldBreak ? 'break time' : 'ready',
@@ -435,34 +453,44 @@ class _BreakCardState extends State<_BreakCard> {
         child: Column(
           children: [
             const Spacer(),
-            Text(
-              'Break time!',
-              style: AppTheme.headingMedium.copyWith(color: AppTheme.pink),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 48),
-            Text(
-              '$_remainingSeconds',
-              style: AppTheme.headingLarge.copyWith(
-                fontSize: 72,
-                color: AppTheme.cyan,
+            GlassContainer(
+              glowColor: AppTheme.pink,
+              fillOpacity: 0.12,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Break time!',
+                    style:
+                        AppTheme.headingMedium.copyWith(color: AppTheme.pink),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  Text(
+                    '$_remainingSeconds',
+                    style: AppTheme.headingLarge.copyWith(
+                      fontSize: 72,
+                      color: AppTheme.cyan,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  Text(
+                    'How about:',
+                    style: AppTheme.bodyLarge.copyWith(
+                      fontSize: 20,
+                      color: AppTheme.comment,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '${widget.activity.emoji} ${widget.activity.text}',
+                    style: AppTheme.headingMedium.copyWith(fontSize: 28),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 48),
-            Text(
-              'How about:',
-              style: AppTheme.bodyLarge.copyWith(
-                fontSize: 20,
-                color: AppTheme.comment,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '${widget.activity.emoji} ${widget.activity.text}',
-              style: AppTheme.headingMedium.copyWith(fontSize: 28),
-              textAlign: TextAlign.center,
             ),
             const Spacer(),
             AdvanceArrow(

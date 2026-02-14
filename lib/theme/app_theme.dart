@@ -38,14 +38,28 @@ class AppTheme {
   );
 
   // Button Style
-  static ButtonStyle primaryButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: purple,
-    foregroundColor: background,
-    minimumSize: const Size(double.infinity, 72),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-    ),
-    elevation: 0,
+  static final ButtonStyle primaryButtonStyle = ButtonStyle(
+    backgroundColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.pressed)) {
+        return purple.withValues(alpha: 0.40);
+      }
+      return purple.withValues(alpha: 0.20);
+    }),
+    foregroundColor: WidgetStateProperty.all(foreground),
+    minimumSize: WidgetStateProperty.all(const Size(double.infinity, 72)),
+    shape: WidgetStateProperty.resolveWith((states) {
+      final borderOpacity =
+          states.contains(WidgetState.pressed) ? 0.6 : 0.35;
+      return RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: purple.withValues(alpha: borderOpacity),
+          width: 1.0,
+        ),
+      );
+    }),
+    elevation: WidgetStateProperty.all(0),
+    overlayColor: WidgetStateProperty.all(Colors.transparent),
   );
 
   // Theme Data

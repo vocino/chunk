@@ -88,17 +88,29 @@ class _AdvanceArrowState extends State<AdvanceArrow>
               children: [
                 Text(
                   widget.label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: AppTheme.comment,
+                    shadows: [
+                      Shadow(
+                        color: AppTheme.purple.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Icon(
+                Icon(
                   Icons.keyboard_arrow_down,
                   size: 32,
                   color: AppTheme.foreground,
+                  shadows: [
+                    Shadow(
+                      color: AppTheme.purple.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                    ),
+                  ],
                 ),
               ],
             ),
