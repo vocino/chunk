@@ -43,19 +43,19 @@ class BreakTimerSelector extends StatelessWidget {
         height: 40 * scale,
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.purple.withValues(alpha: 0.20)
+              ? AppTheme.mauve.withValues(alpha: 0.20)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20 * scale),
           border: Border.all(
             color: isSelected
-                ? AppTheme.purple.withValues(alpha: 0.35)
-                : AppTheme.comment.withValues(alpha: 0.3),
+                ? AppTheme.mauve.withValues(alpha: 0.35)
+                : AppTheme.overlay1.withValues(alpha: 0.3),
             width: 1.0,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppTheme.purple.withValues(alpha: 0.08),
+                    color: AppTheme.mauve.withValues(alpha: 0.08),
                     blurRadius: 16,
                     spreadRadius: 2,
                   ),
@@ -68,7 +68,7 @@ class BreakTimerSelector extends StatelessWidget {
           style: TextStyle(
             fontSize: 14 * scale,
             fontWeight: FontWeight.w400,
-            color: isSelected ? AppTheme.foreground : AppTheme.comment,
+            color: isSelected ? AppTheme.text : AppTheme.overlay1,
           ),
         ),
       ),

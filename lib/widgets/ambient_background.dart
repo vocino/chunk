@@ -24,8 +24,8 @@ class _AmbientBackgroundState extends State<AmbientBackground>
 
     _orbs = [
       _AmbientOrbConfig(
-        color: AppTheme.purple,
-        opacity: 0.08,
+        color: AppTheme.mauve,
+        opacity: 0.10,
         sizeRatio: 0.7 + rng.nextDouble() * 0.2,
         anchor: const Offset(-0.3, -0.3),
         driftRadius: 0.08 + rng.nextDouble() * 0.07,
@@ -33,8 +33,8 @@ class _AmbientBackgroundState extends State<AmbientBackground>
         useControllerA: true,
       ),
       _AmbientOrbConfig(
-        color: AppTheme.cyan,
-        opacity: 0.06,
+        color: AppTheme.teal,
+        opacity: 0.08,
         sizeRatio: 0.6 + rng.nextDouble() * 0.2,
         anchor: const Offset(0.3, 0.3),
         driftRadius: 0.08 + rng.nextDouble() * 0.07,
@@ -42,8 +42,8 @@ class _AmbientBackgroundState extends State<AmbientBackground>
         useControllerA: false,
       ),
       _AmbientOrbConfig(
-        color: AppTheme.pink,
-        opacity: 0.05,
+        color: AppTheme.sapphire,
+        opacity: 0.07,
         sizeRatio: 0.65 + rng.nextDouble() * 0.2,
         anchor: const Offset(0.3, -0.25),
         driftRadius: 0.08 + rng.nextDouble() * 0.07,
@@ -51,8 +51,8 @@ class _AmbientBackgroundState extends State<AmbientBackground>
         useControllerA: true,
       ),
       _AmbientOrbConfig(
-        color: AppTheme.purple,
-        opacity: 0.04,
+        color: AppTheme.lavender,
+        opacity: 0.06,
         sizeRatio: 0.55 + rng.nextDouble() * 0.2,
         anchor: const Offset(-0.25, 0.3),
         driftRadius: 0.08 + rng.nextDouble() * 0.07,

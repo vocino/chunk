@@ -128,7 +128,7 @@ class _SessionScreenState extends State<SessionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: AppTheme.base,
       body: Stack(
         children: [
           const RepaintBoundary(
@@ -205,7 +205,7 @@ class _SessionScreenState extends State<SessionScreen> {
             Text(
               'Ready?',
               textAlign: TextAlign.center,
-              style: AppTheme.headingLarge(context).copyWith(color: AppTheme.purple),
+              style: AppTheme.headingLarge(context).copyWith(color: AppTheme.mauve),
             ),
             const SizedBox(height: 24),
             Text(
@@ -213,7 +213,7 @@ class _SessionScreenState extends State<SessionScreen> {
               style: TextStyle(
                 fontSize: 14 * AppTheme.scaleFactor(context),
                 fontWeight: FontWeight.w400,
-                color: AppTheme.comment,
+                color: AppTheme.overlay1,
               ),
             ),
             const SizedBox(height: 12),
@@ -366,6 +366,10 @@ class _CompletionCardState extends State<_CompletionCard>
             const Spacer(),
             GlassContainer(
               glowColor: AppTheme.green,
+              borderGradient: AppTheme.borderGradient(
+                from: AppTheme.green,
+                to: AppTheme.teal,
+              ),
               fillOpacity: 0.10,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -375,7 +379,7 @@ class _CompletionCardState extends State<_CompletionCard>
                     child: Text(
                       'That took',
                       style:
-                          AppTheme.bodyLarge(context).copyWith(color: AppTheme.comment),
+                          AppTheme.bodyLarge(context).copyWith(color: AppTheme.overlay1),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -409,7 +413,7 @@ class _CompletionCardState extends State<_CompletionCard>
                         child: Text(
                           '${widget.questionsUntilBreak} more until break',
                           style: AppTheme.bodyLarge(context)
-                              .copyWith(color: AppTheme.comment),
+                              .copyWith(color: AppTheme.overlay1),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -479,6 +483,10 @@ class _BreakCardState extends State<_BreakCard> {
             const Spacer(),
             GlassContainer(
               glowColor: AppTheme.pink,
+              borderGradient: AppTheme.borderGradient(
+                from: AppTheme.pink,
+                to: AppTheme.mauve,
+              ),
               fillOpacity: 0.12,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -494,7 +502,7 @@ class _BreakCardState extends State<_BreakCard> {
                     '$_remainingSeconds',
                     style: AppTheme.headingLarge(context).copyWith(
                       fontSize: 72 * AppTheme.scaleFactor(context),
-                      color: AppTheme.cyan,
+                      color: AppTheme.sky,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -503,7 +511,7 @@ class _BreakCardState extends State<_BreakCard> {
                     'How about:',
                     style: AppTheme.bodyLarge(context).copyWith(
                       fontSize: 20 * AppTheme.scaleFactor(context),
-                      color: AppTheme.comment,
+                      color: AppTheme.overlay1,
                     ),
                     textAlign: TextAlign.center,
                   ),

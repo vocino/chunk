@@ -95,10 +95,10 @@ class _AdvanceArrowState extends State<AdvanceArrow>
                   style: TextStyle(
                     fontSize: (widget.enlarged ? 18 : 14) * AppTheme.scaleFactor(context),
                     fontWeight: FontWeight.w400,
-                    color: AppTheme.comment,
+                    color: AppTheme.overlay1,
                     shadows: [
                       Shadow(
-                        color: AppTheme.purple.withValues(alpha: 0.3),
+                        color: AppTheme.mauve.withValues(alpha: 0.3),
                         blurRadius: 8,
                       ),
                     ],
@@ -108,10 +108,10 @@ class _AdvanceArrowState extends State<AdvanceArrow>
                 Icon(
                   Icons.keyboard_arrow_down,
                   size: (widget.enlarged ? 48 : 32) * AppTheme.scaleFactor(context),
-                  color: AppTheme.foreground,
+                  color: AppTheme.text,
                   shadows: [
                     Shadow(
-                      color: AppTheme.purple.withValues(alpha: 0.2),
+                      color: AppTheme.mauve.withValues(alpha: 0.2),
                       blurRadius: 12,
                     ),
                   ],

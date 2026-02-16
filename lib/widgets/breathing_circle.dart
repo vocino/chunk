@@ -27,8 +27,8 @@ class _BreathingCircleState extends State<BreathingCircle>
     // Each instance gets a unique arrangement
     _circles = [
       _CircleConfig(
-        color: AppTheme.purple,
-        baseOpacity: 0.2 + rng.nextDouble() * 0.1,
+        color: AppTheme.mauve,
+        baseOpacity: 0.25 + rng.nextDouble() * 0.1,
         minScale: 0.4 + rng.nextDouble() * 0.1,
         maxScale: 0.8 + rng.nextDouble() * 0.15,
         angle: rng.nextDouble() * 2 * pi,
@@ -37,8 +37,8 @@ class _BreathingCircleState extends State<BreathingCircle>
         driftAmount: 0.02 + rng.nextDouble() * 0.03,
       ),
       _CircleConfig(
-        color: AppTheme.cyan,
-        baseOpacity: 0.2 + rng.nextDouble() * 0.15,
+        color: AppTheme.teal,
+        baseOpacity: 0.25 + rng.nextDouble() * 0.15,
         minScale: 0.35 + rng.nextDouble() * 0.1,
         maxScale: 0.75 + rng.nextDouble() * 0.15,
         angle: rng.nextDouble() * 2 * pi,
@@ -47,8 +47,8 @@ class _BreathingCircleState extends State<BreathingCircle>
         driftAmount: 0.02 + rng.nextDouble() * 0.03,
       ),
       _CircleConfig(
-        color: AppTheme.pink,
-        baseOpacity: 0.2 + rng.nextDouble() * 0.1,
+        color: AppTheme.sapphire,
+        baseOpacity: 0.25 + rng.nextDouble() * 0.1,
         minScale: 0.35 + rng.nextDouble() * 0.1,
         maxScale: 0.75 + rng.nextDouble() * 0.15,
         angle: rng.nextDouble() * 2 * pi,
