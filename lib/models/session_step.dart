@@ -1,6 +1,6 @@
 import 'break_activity.dart';
 
-enum StepType { start, timer, completion, break_ }
+enum StepType { start, timer, completion, break_, summary }
 
 class SessionStep {
   final StepType type;
