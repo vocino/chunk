@@ -115,7 +115,7 @@ class _SessionScreenState extends State<SessionScreen> {
       _steps.add(SessionStep(StepType.summary));
       _currentStepIndex = _steps.length - 1;
     });
-    WidgetBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
