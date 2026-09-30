@@ -1,158 +1,74 @@
-# Chunk MVP - Testing Report
+# Chunk - Testing Guide
 
-## Testing Date
-2026-02-09
+## Gates
 
-## Testing Environment
-- Browser: Microsoft Edge 144.0.3719.115
-- Flutter: Web (debug mode)
-- Platform: Windows
+```bash
+# Static analysis (must be clean)
+flutter analyze
 
-## Pre-Testing Code Analysis
+# Full test suite (must be green)
+flutter test
 
-### Static Analysis
-- **flutter analyze**: ✓ PASSED - No issues found
-- **flutter test**: ✓ PASSED - All tests passed
-
-### Code Review Results
-
-#### 1. Session State Logic
-- **questionsUntilBreak calculation**: ✓ Correct
-  - Formula: `5 - (_questionCount % 5)`
-  - Q1: Shows "4/5 until break" ✓
-  - Q2: Shows "3/5 until break" ✓
-  - Q3: Shows "2/5 until break" ✓
-  - Q4: Shows "1/5 until break" ✓
-  - Q5: Triggers break (counter hidden) ✓
-
-- **shouldTriggerBreak**: ✓ Correct
-  - Returns true when `questionCount % 5 == 0 && questionCount > 0`
-  - Properly triggers after 5th question
-
-#### 2. Timer Service
-- **Start method**: ✓ Correctly initializes and starts periodic timer
-- **Stop method**: ✓ Returns elapsed time and cancels timer
-- **Format method**: ✓ Properly formats seconds as "Xm Ys"
-
-#### 3. Navigation Flow
-- Uses `pushReplacement` to prevent stack buildup ✓
-- Break screen uses `pushAndRemoveUntil` to clear stack ✓
-
-#### 4. Activity Service
-- Loads 52 activities from JSON ✓
-- Filters recent activities to prevent immediate repeats ✓
-- Falls back to full pool if all activities used ✓
-
-#### 5. Breathing Circle Animation
-- 19-second cycle (4s expand, 7s hold, 8s contract) ✓
-- Color transitions from blue to purple ✓
-- Smooth easing curves ✓
-
-#### 6. Break Screen Timer
-- 60-second countdown ✓
-- Auto-navigation when reaching 0 ✓
-- Early exit button appears in last 3 seconds ✓
-- Properly disposes timer on exit ✓
-
-### Bug Found and Fixed
-
-#### Bug #1: Widget Test Compilation Error
-**Issue**: Test file was using outdated template that didn't provide required `activityService` parameter to `MyApp` widget.
-
-**Error**:
-```
-The named parameter 'activityService' is required, but there's no corresponding argument
+# Targeted runs
+flutter test test/timer_service_test.dart
+flutter test --coverage
 ```
 
-**Fix**: Updated `test/widget_test.dart` to:
-1. Import `ActivityService`
-2. Initialize `ActivityService` and load activities
-3. Pass `activityService` to `MyApp` constructor
-4. Changed test to verify Start screen displays correctly
+CI (`.github/workflows/pages.yml`) runs `flutter analyze` and `flutter test` on every push before building the Pages deploy. A red gate blocks deployment.
 
-**Status**: ✓ Fixed and verified
+## What's Covered
 
-## Runtime Testing
+### Unit tests
 
-### Console Output Analysis
-- No errors in console output ✓
-- App launched successfully in Edge ✓
-- No warnings or exceptions ✓
-- Viewport meta tag warning is expected (Flutter replaces it) ✓
+| File | Covers |
+|---|---|
+| `test/session_state_test.dart` | Break fires at exactly 5 (not 4 or 6); `questionsUntilBreak` countdown 5→1; `resetCycle` resets the cycle count but preserves totals; 10-id activity history cap with oldest-first eviction; break-duration persistence round-trip |
+| `test/timer_service_test.dart` | Start/stop transitions; double-start no-op; elapsed derived from wall clock via injected `now` (no ticks needed); `formatElapsed` edge cases (0, sub-minute, exact minute, 61:01) |
+| `test/activity_service_test.dart` | Never returns a recent activity; falls back to the full pool when everything is recent; throws when activities were never loaded |
 
-### Expected User Flow
-1. **Start Screen** → Display "Ready?" heading with "Start" button
-2. **Click Start** → Navigate to Timer Screen, start timer
-3. **Timer Screen** → Breathing circle animates (19s cycle), timer counts up
-4. **Click Done** → Navigate to Completion Screen
-5. **Completion Screen** → Show elapsed time + progress counter (4/5, 3/5, 2/5, 1/5)
-6. **Click "Next question"** → Return to Timer Screen for next question
-7. **After 5th question** → Completion shows "Break time!" button (no counter)
-8. **Click "Break time!"** → Navigate to Break Screen
-9. **Break Screen** → 60-second countdown with random activity suggestion
-10. **Countdown reaches 0** → Auto-navigate back to Start Screen
-11. **Cycle repeats** → Can complete multiple cycles indefinitely
+### Widget tests
 
-### Key Features Verified (Code Review)
+| File | Covers |
+|---|---|
+| `test/widget_test.dart` | App launches on the "Ready?" start card |
+| `test/card_widget_test.dart` | Completion card shows the formatted time and "N more until break", tap advances; break card counts down from its end timestamp, early "back to work" tap exits |
 
-#### Checklist from Requirements
-- [x] Start screen displays correctly
-- [x] Breathing circle animates smoothly (19s cycle with proper timing)
-- [x] Timer counts correctly (1-second intervals via Timer.periodic)
-- [x] Completion screen shows accurate time (formatted as "Xm Ys")
-- [x] Progress counter decrements correctly (4/5, 3/5, 2/5, 1/5)
-- [x] Break triggers after 5th question (modulo logic verified)
-- [x] Break activities are varied (52 activities with anti-repeat logic)
-- [x] Break countdown counts from 60 to 0 (verified in code)
-- [x] Auto-return to Start after break (via pushAndRemoveUntil)
-- [x] Can complete multiple cycles (resetCycle called after break)
+Sound-producing paths (break auto-complete, page-change chimes) are deliberately not exercised in widget tests — `audioplayers` has no platform implementation under `flutter test`.
 
-## Potential Edge Cases Considered
+## Manual Verification Checklist
 
-1. **Activity pool exhaustion**: ✓ Handled by resetting pool if all filtered out
-2. **Timer disposal**: ✓ All timers properly disposed in dispose() methods
-3. **Navigation stack buildup**: ✓ Prevented by pushReplacement and pushAndRemoveUntil
-4. **Concurrent timer starts**: ✓ Protected by isRunning check
-5. **Browser refresh**: App state will reset (expected for MVP)
+Run `flutter run -d chrome` (or Edge) and walk the flow:
 
-## Mobile Responsiveness
+1. **Start card** → "Ready?" heading, break-duration pills (10s/30s/60s), "swipe to start" arrow
+2. **Swipe up** → timer card, breathing animation plays, no time visible
+3. **Swipe up ("finished")** → completion card shows elapsed time + "4 more until break"
+4. **Repeat to 5 questions** → 5th completion card shows "break time" arrow, no counter
+5. **Swipe up** → break card counts down with an activity suggestion (10s duration keeps this quick)
+6. **Countdown hits 0** → ding plays, auto-advances to a fresh start card
+7. **"all done"** (completion or break card) → summary card with per-question times and total
+8. **Swipe down anywhere** → history scrolls back; timer keeps running
+9. **Reload the page** → session resets (expected), break-duration setting persists
 
-### Code Review
-- SafeArea used on all screens ✓
-- Responsive sizing using MediaQuery ✓
-- Breathing circle adapts to smaller dimension ✓
-- PWA manifest configured for mobile ✓
-- Viewport meta tag configured ✓
+### Timer accuracy check (do after timer changes)
 
-## Performance
+1. Start a question, background the tab for 5+ minutes, foreground it, finish
+2. Completion time must be within a few seconds of real elapsed time
+3. Repeat for a break countdown: total break length must match the selected duration
 
-### Observations
-- No unnecessary rebuilds (ChangeNotifier used correctly)
-- Animations use hardware acceleration (CustomPaint)
-- Single Timer instance per service
-- Minimal state management overhead
+### Accessibility pass (do after UI changes)
 
-## Summary
+1. Enable reduced motion in the OS → breathing circle and background orbs render static
+2. Screen reader on → arrow announces its action ("finished", "break time", ...); break countdown announces remaining seconds
 
-### Bugs Fixed: 1
-1. Widget test compilation error (missing activityService parameter)
+## Edge Cases (by design)
 
-### Code Quality
-- No lint warnings
-- All tests passing
-- Clean console output
-- Proper resource disposal
-- Good separation of concerns
+1. **Activity pool exhaustion**: falls back to the full pool when all 50 are recent
+2. **Timer disposal**: services cancel timers on dispose; break card cancels its countdown on exit
+3. **Double advance**: `_isTransitioning` guard makes simultaneous swipe + tap a single step
+4. **Concurrent timer starts**: `start()` no-ops while running
+5. **Stop without start**: returns 0, no crash
+6. **Browser refresh**: session state resets; only the break-duration setting survives
 
-### Testing Status
-**PASSED** - All code review checks completed successfully. Application logic is sound, navigation flows correctly, and all expected features are implemented as specified.
+## History
 
-### Recommendations for Future Testing
-1. Manual browser testing to verify visual appearance
-2. Test on actual mobile devices
-3. Test break cycle 2-3 times to verify activity randomization
-4. Verify timer accuracy over longer periods (5+ minutes)
-5. Test rapid button clicking for race conditions
-
-### Conclusion
-The application code is production-ready for MVP deployment. All critical paths have been reviewed and verified. The single bug found (widget test) has been fixed and confirmed working.
+- **2026-02-09**: MVP code-review testing of the original 4-screen button flow (Start → Timer → Completion → Break). All checks passed; one widget-test compile issue fixed. The flow has since been replaced by swipe navigation — the findings above supersede that report.
