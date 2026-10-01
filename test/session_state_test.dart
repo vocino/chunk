@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chunk/models/session_state.dart';
 
 void main() {
@@ -99,6 +100,27 @@ void main() {
       state.addRecentActivity('a1');
       expect(() => (state.recentActivityIds as dynamic).add('a2'),
           throwsUnsupportedError);
+    });
+  });
+
+  group('SessionState — break duration persistence', () {
+    test('loadPreferences defaults to 60 when nothing is stored', () async {
+      SharedPreferences.setMockInitialValues({});
+      final state = SessionState();
+      await state.loadPreferences();
+      expect(state.breakDuration, 60);
+    });
+
+    test('setBreakDuration persists and loadPreferences restores it', () async {
+      SharedPreferences.setMockInitialValues({});
+      final writer = SessionState();
+      writer.setBreakDuration(30);
+      // setBreakDuration persists in the background; let it finish.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final reader = SessionState();
+      await reader.loadPreferences();
+      expect(reader.breakDuration, 30);
     });
   });
 }

@@ -45,6 +45,33 @@ void main() {
     });
   });
 
+  group('TimerService — wall-clock elapsed', () {
+    test('elapsed reflects wall-clock time without any ticks firing', () {
+      var now = DateTime(2026, 1, 1, 12);
+      final timer = TimerService(now: () => now);
+      timer.start();
+      // Time passes but no periodic tick fires (e.g. throttled background tab).
+      now = now.add(const Duration(seconds: 65));
+      expect(timer.elapsedSeconds, 65);
+      expect(timer.stop(), 65);
+    });
+
+    test('stop freezes elapsed at the stop moment', () {
+      var now = DateTime(2026, 1, 1, 12);
+      final timer = TimerService(now: () => now);
+      timer.start();
+      now = now.add(const Duration(seconds: 10));
+      expect(timer.stop(), 10);
+      now = now.add(const Duration(seconds: 50));
+      expect(timer.elapsedSeconds, 10);
+    });
+
+    test('stop without start returns zero', () {
+      final timer = TimerService();
+      expect(timer.stop(), 0);
+    });
+  });
+
   group('TimerService — formatElapsed', () {
     late TimerService timer;
 
