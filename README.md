@@ -90,6 +90,7 @@ test/
 ├── session_state_test.dart     # Break cadence, counters, history cap
 ├── timer_service_test.dart     # Start/stop, wall-clock elapsed, formatting
 ├── card_widget_test.dart       # Completion + break card widget tests
+├── desktop_input_test.dart     # Mouse drag, click, and wheel advance
 └── widget_test.dart            # App launch smoke test
 
 web/
