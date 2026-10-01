@@ -12,11 +12,33 @@ import 'package:chunk/widgets/completion_card.dart';
 // because the cards contain intentionally infinite animations (arrow bounce)
 // and, for BreakCard, a repeating countdown timer.
 
+/// The default 800x600 test surface is shorter than a phone in portrait and
+/// scales type up (shortest side 600), which overflows the cards. Run them at
+/// a phone-like 390x844 instead.
+void _setPhoneViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1170, 2532);
+  tester.view.devicePixelRatio = 3.0;
+  addTearDown(tester.view.reset);
+}
+
+/// Pumps until [done] or a 1s fake-time budget runs out. The advance arrow
+/// fires onTap only after its 150ms tap animation, and gesture-arena
+/// resolution can consume the first pump, so a single pump is not enough.
+Future<void> _pumpUntilAdvance(
+  WidgetTester tester,
+  bool Function() done,
+) async {
+  for (var i = 0; i < 10 && !done(); i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
 void main() {
   group('CompletionCard', () {
     testWidgets('shows time and progress, tap advances', (
       WidgetTester tester,
     ) async {
+      _setPhoneViewport(tester);
       var advanced = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -36,13 +58,14 @@ void main() {
       expect(find.text('2 more until break'), findsOneWidget);
 
       await tester.tap(find.text('ready'));
-      await tester.pump(const Duration(milliseconds: 200));
+      await _pumpUntilAdvance(tester, () => advanced);
       expect(advanced, isTrue);
     });
 
     testWidgets('break variant shows break-time arrow and no counter', (
       WidgetTester tester,
     ) async {
+      _setPhoneViewport(tester);
       await tester.pumpWidget(
         MaterialApp(
           home: CompletionCard(
@@ -63,6 +86,7 @@ void main() {
     testWidgets('all-done button ends the session', (
       WidgetTester tester,
     ) async {
+      _setPhoneViewport(tester);
       var done = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -115,6 +139,7 @@ void main() {
     testWidgets('counts down from its end timestamp', (
       WidgetTester tester,
     ) async {
+      _setPhoneViewport(tester);
       var now = DateTime(2026, 1, 1, 12);
       await tester.pumpWidget(
         wrapBreakCard(
@@ -137,6 +162,7 @@ void main() {
     testWidgets('early exit completes without waiting out the countdown', (
       WidgetTester tester,
     ) async {
+      _setPhoneViewport(tester);
       var completed = false;
       final now = DateTime(2026, 1, 1, 12);
       await tester.pumpWidget(
@@ -149,7 +175,7 @@ void main() {
       await tester.pump();
 
       await tester.tap(find.text('back to work'));
-      await tester.pump(const Duration(milliseconds: 200));
+      await _pumpUntilAdvance(tester, () => completed);
       expect(completed, isTrue);
     });
   });
