@@ -3,31 +3,41 @@ import 'package:flutter/foundation.dart';
 
 class TimerService extends ChangeNotifier {
   Timer? _timer;
-  int _elapsedSeconds = 0;
+  DateTime? _startTime;
+  int _stoppedElapsed = 0;
   bool _isRunning = false;
+  final DateTime Function() _now;
 
-  int get elapsedSeconds => _elapsedSeconds;
+  TimerService({DateTime Function()? now}) : _now = now ?? DateTime.now;
+
+  int get elapsedSeconds =>
+      _isRunning ? _now().difference(_startTime!).inSeconds : _stoppedElapsed;
   bool get isRunning => _isRunning;
 
   void start() {
     if (_isRunning) return;
 
     _isRunning = true;
-    _elapsedSeconds = 0;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _elapsedSeconds++;
-      notifyListeners();
-    });
+    _startTime = _now();
+    _stoppedElapsed = 0;
+    // Ticks only refresh listeners; elapsed time comes from the wall clock so
+    // background throttling can't corrupt timings.
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => notifyListeners(),
+    );
     notifyListeners();
   }
 
   int stop() {
+    if (_isRunning && _startTime != null) {
+      _stoppedElapsed = _now().difference(_startTime!).inSeconds;
+    }
     _isRunning = false;
     _timer?.cancel();
     _timer = null;
-    final elapsed = _elapsedSeconds;
     notifyListeners();
-    return elapsed;
+    return _stoppedElapsed;
   }
 
   String formatElapsed(int seconds) {

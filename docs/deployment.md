@@ -1,5 +1,14 @@
 # Deployment Instructions
 
+## Production: GitHub Pages (automatic)
+
+Every push to `main` triggers `.github/workflows/pages.yml`, which runs
+`flutter analyze` + `flutter test`, then builds (`flutter build web --release
+--base-href /chunk/`) and deploys to GitHub Pages. No manual steps.
+
+Flutter version is pinned in the workflow file. Bump it there (and verify the
+build) rather than relying on a local SDK version.
+
 ## Building for Web
 
 ### Development Build
@@ -14,14 +23,9 @@ flutter build web --release
 
 Output will be in `build/web/` directory.
 
-## Hosting Options
+## Alternative Hosting Options
 
-### Option 1: GitHub Pages (Free)
-1. Build the web app: `flutter build web --release`
-2. Copy contents of `build/web/` to GitHub Pages branch
-3. Enable GitHub Pages in repository settings
-
-### Option 2: Firebase Hosting (Free tier available)
+### Firebase Hosting (Free tier available)
 1. Install Firebase CLI: `npm install -g firebase-tools`
 2. Login: `firebase login`
 3. Initialize: `firebase init hosting`
@@ -29,12 +33,12 @@ Output will be in `build/web/` directory.
 5. Build: `flutter build web --release`
 6. Deploy: `firebase deploy --only hosting`
 
-### Option 3: Netlify (Free tier available)
+### Netlify (Free tier available)
 1. Build: `flutter build web --release`
 2. Drag and drop `build/web/` folder to Netlify
 3. Or connect GitHub repo for auto-deploy
 
-### Option 4: Vercel (Free tier available)
+### Vercel (Free tier available)
 1. Install Vercel CLI: `npm install -g vercel`
 2. Build: `flutter build web --release`
 3. Deploy: `vercel build/web`
@@ -66,12 +70,12 @@ Monitor in production:
 ### Breathing circle not animating smoothly
 - Check browser hardware acceleration is enabled
 - Test on different devices
-- Consider reducing gradient complexity
+- Verify reduced-motion is off (animations intentionally freeze when it's on)
 
 ### Timer inaccurate on mobile
-- This is a known limitation of web timers
-- Accuracy within ±2 seconds over 20 minutes is acceptable
-- Native app will solve this
+- Elapsed time is wall-clock derived, so throttled background tabs stay honest
+- Accuracy within a few seconds over a long session is expected
+- True background operation needs the native app (v2.0)
 
 ### PWA not installable
 - Verify manifest.json is being served

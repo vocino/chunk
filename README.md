@@ -4,7 +4,7 @@
 
 ## Overview
 
-Chunk is an ADHD-friendly homework helper that removes time pressure anxiety through radical task chunking. Kids work one question at a time with a calming breathing animation, then take structured 60-second breaks every 5 questions.
+Chunk is an ADHD-friendly homework helper that removes time pressure anxiety through radical task chunking. Kids work one question at a time with a calming breathing animation, then take structured breaks every 5 questions.
 
 **Core Philosophy:**
 - No time pressure (count-up timer hidden during work)
@@ -17,8 +17,8 @@ Chunk is an ADHD-friendly homework helper that removes time pressure anxiety thr
 
 ### Prerequisites
 
-- Flutter SDK 3.10.8 or higher
-- Dart SDK
+- Flutter SDK (see `.github/workflows/pages.yml` for the pinned CI version)
+- Dart SDK (bundled with Flutter)
 - Chrome or Edge (for web development)
 - VS Code or Android Studio (recommended)
 
@@ -26,11 +26,8 @@ Chunk is an ADHD-friendly homework helper that removes time pressure anxiety thr
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/chunk.git
+git clone https://github.com/vocino/chunk.git
 cd chunk
-
-# Switch to the MVP implementation worktree
-cd .worktrees/mvp-implementation
 
 # Install dependencies
 flutter pub get
@@ -59,24 +56,41 @@ flutter build web --release
 lib/
 ├── main.dart                   # App entry point, provider setup
 ├── models/
-│   ├── session_state.dart      # Session state (question count, progress)
+│   ├── session_state.dart      # Session state (question count, progress, timings)
+│   ├── session_step.dart       # Step types for the swipe-navigation flow
 │   └── break_activity.dart     # Break activity model
 ├── services/
-│   ├── timer_service.dart      # Timer logic (start, stop, format)
-│   └── activity_service.dart   # Activity selection and filtering
+│   ├── timer_service.dart      # Wall-clock timer logic (start, stop, format)
+│   ├── activity_service.dart   # Activity selection and filtering
+│   └── sound_service*.dart     # Sound effects (native audioplayers / web Audio API)
 ├── screens/
-│   ├── start_screen.dart       # "Ready?" screen with Start button
-│   ├── timer_screen.dart       # Work timer with breathing circle
-│   ├── completion_screen.dart  # Show time taken and progress
-│   └── break_screen.dart       # 60s break countdown + activity
+│   └── session_screen.dart     # Single-screen vertical PageView flow
 ├── widgets/
-│   └── breathing_circle.dart   # Animated breathing circle (19s cycle)
+│   ├── advance_arrow.dart      # Swipe-up / tap-to-advance affordance
+│   ├── ambient_background.dart # Slow-drifting background orbs
+│   ├── break_timer_selector.dart # 10s / 30s / 60s break duration pills
+│   ├── breathing_circle.dart   # 4-7-8 breathing animation (19s cycle)
+│   ├── completion_card.dart    # "That took ..." + progress until break
+│   ├── break_card.dart         # Break countdown + activity suggestion
+│   ├── summary_card.dart       # End-of-session per-question recap
+│   └── glass_container.dart    # Translucent card surface
 └── theme/
-    └── app_theme.dart          # Color palette and text styles
+    └── app_theme.dart          # Catppuccin Mocha palette, type, scaling
 
 assets/
-└── data/
-    └── activities.json         # 52 break activities
+├── data/
+│   └── activities.json         # 50 break activities in 5 categories
+└── sounds/
+    ├── chime.wav               # Break start
+    ├── ding.wav                # Break end
+    └── pop.wav                 # Question completed
+
+test/
+├── activity_service_test.dart  # Anti-repeat selection, pool fallback
+├── session_state_test.dart     # Break cadence, counters, history cap
+├── timer_service_test.dart     # Start/stop, wall-clock elapsed, formatting
+├── card_widget_test.dart       # Completion + break card widget tests
+└── widget_test.dart            # App launch smoke test
 
 web/
 ├── index.html                  # PWA setup
@@ -97,12 +111,15 @@ flutter test --coverage
 flutter analyze
 ```
 
+CI runs `flutter analyze` and `flutter test` on every push (see `.github/workflows/pages.yml`), then builds and deploys the web app to GitHub Pages.
+
 ### Dependencies
 
 **Core:**
 - `flutter` - UI framework
 - `provider` (^6.1.0) - State management
-- `shared_preferences` (^2.2.0) - Local storage (settings)
+- `shared_preferences` (^2.2.0) - Local storage (break duration setting)
+- `audioplayers` (^6.5.1) - Sound effects (native platforms; web uses the Audio API directly)
 
 **Dev:**
 - `flutter_test` - Testing framework
@@ -110,31 +127,35 @@ flutter analyze
 
 ### State Management
 
-Uses `provider` for state management with three providers:
-- `SessionState` - Tracks question count, cycle progress
-- `TimerService` - Handles timer start/stop and formatting
+Uses `provider` for state management with four providers:
+- `SessionState` - Tracks question count, cycle progress, per-question times, break duration
+- `TimerService` - Handles timer start/stop and formatting (wall-clock derived)
 - `ActivityService` - Manages break activity selection
+- `SoundService` - Plays pop/chime/ding feedback sounds
 
 ### Key Features Implemented
 
-- **Start Screen**: Single "Start" button to begin a question
-- **Timer Screen**: Breathing circle animation (4-7-8 pattern, 19s cycle)
-- **Completion Screen**: Shows elapsed time ("3m 24s") and progress ("2/5 until break")
-- **Break System**: Triggers automatically after 5 questions
-- **Break Screen**: 60-second countdown with random activity suggestion
-- **Activity Pool**: 52 varied activities with anti-repeat logic
-- **Navigation Flow**: Clean navigation stack management
-- **PWA Support**: Installable as progressive web app
+- **Swipe navigation**: Single-screen vertical `PageView` — swipe up (or tap the arrow) to advance
+- **Start card**: "Ready?" prompt with selectable break duration (10s / 30s / 60s)
+- **Timer card**: Breathing circle animation (4-7-8 pattern, 19s cycle), timer hidden
+- **Completion card**: Shows elapsed time ("03:24") and progress ("2 more until break")
+- **Break system**: Triggers automatically after 5 questions, with random activity suggestion
+- **Break card**: Countdown with activity idea, early "back to work" exit
+- **Summary card**: End-of-session recap with per-question times and total ("all done")
+- **Sound + haptics**: Subtle feedback on completion, break start, and break end
+- **Activity pool**: 50 varied activities with anti-repeat logic
+- **PWA support**: Installable as progressive web app
 
-## Current MVP Status
+## Current Status
 
 ### What Works ✅
 
-- Complete user flow (Start → Timer → Completion → Break → Repeat)
-- Accurate timer (tested with code review)
-- Smooth breathing animation (60fps on web)
+- Complete user flow (Start → Timer → Completion → Break → Repeat → Summary)
+- Wall-clock timer (robust to background throttling)
+- Smooth breathing animation with reduced-motion support
 - Break triggers correctly after 5th question
 - Activity randomization with anti-repeat logic
+- Break duration persists across restarts
 - PWA installable on mobile devices
 - Responsive design (phone, tablet, desktop)
 - Zero data collection (privacy-first)
@@ -161,15 +182,15 @@ Uses `provider` for state management with three providers:
 
 ### Known Limitations
 
-- Web-based timer (slight inaccuracy if tab backgrounded)
-- No session persistence (state resets on page refresh)
+- Web-based (native apps planned for v2.0)
+- No session persistence across page refresh (only the break-duration setting persists)
 - Single user profile only
 - Fixed 5-question break cadence
-- No onboarding flow (jumps straight to Start)
+- No onboarding flow (start card carries a one-line hint)
 
 ## Testing
 
-See [TESTING.md](TESTING.md) for complete testing report.
+See [TESTING.md](TESTING.md) for the testing guide.
 
 **Quick verification checklist:**
 ```bash
@@ -181,28 +202,25 @@ flutter analyze
 
 # 3. Run app and verify flow
 flutter run -d chrome
-# Then: Start → Done → Next (x5) → Break → Start (repeat)
+# Then swipe up through: Start → Timer → Completion (x5) → Break → Start, and "all done" → Summary
 ```
 
 ## Deployment
 
 See [docs/deployment.md](docs/deployment.md) for deployment instructions.
 
-**Quick deploy to Firebase Hosting:**
-```bash
-flutter build web --release
-firebase deploy
-```
+**Production deploys automatically:** every push to `main` builds (`flutter build web --release`) and deploys to GitHub Pages via `.github/workflows/pages.yml`.
 
 ## Architecture
 
 For detailed technical architecture, see [docs/architecture.md](docs/architecture.md).
 
 **Key architectural decisions:**
-- Flutter web for MVP (native apps later)
+- Flutter web first, deployed to GitHub Pages (native apps later)
+- Single-screen swipe navigation (`SessionScreen` + card widgets)
 - Provider for simple state management
-- No persistence (MVP simplification)
-- CustomPainter for high-performance animations
+- Wall-clock-derived elapsed time (robust to timer throttling)
+- Minimal persistence: break-duration setting only (shared_preferences)
 - Privacy-first (zero data collection)
 
 ## Contributing

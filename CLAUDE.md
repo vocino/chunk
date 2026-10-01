@@ -9,22 +9,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Key Differentiators:**
 - No time pressure - count-up timer only, obfuscated during work
 - Radical task chunking - one question at a time approach
-- Movement breaks every 5 questions with silly activities
+- Structured breaks every 5 questions with silly activities (10s/30s/60s, selectable)
 - Privacy-first - zero data collection, everything local
 
 ## Development Setup
 
-This project uses **Flutter 3.x** developed on Windows, targeting iOS, iPadOS, and Android.
+This project uses **Flutter 3.x** developed on Windows, targeting web first (deployed to GitHub Pages), with iOS, iPadOS, and Android native apps planned. CI pins the Flutter version — see `.github/workflows/pages.yml`.
 
 ```bash
-# Install dependencies (once project initialized)
+# Install dependencies
 flutter pub get
 
-# Run on connected device/emulator
-flutter run
-
-# Run with hot reload enabled (default)
-flutter run --hot
+# Run on Chrome (web)
+flutter run -d chrome
 
 # Run a specific target device
 flutter devices
@@ -50,9 +47,11 @@ flutter test test/path/to/test_file.dart
 # Run tests with coverage
 flutter test --coverage
 
-# Run widget tests with verbose output
-flutter test --verbose
+# Static analysis (must be clean)
+flutter analyze
 ```
+
+CI runs `flutter analyze` and `flutter test` on every push before building the Pages deploy. See [TESTING.md](TESTING.md) for the testing guide and manual verification checklist.
 
 ## Code Architecture
 
@@ -61,37 +60,45 @@ flutter test --verbose
 - **Anxiety reduction**: No visible countdown timers, no judgment on time taken, flexible pacing
 - **Privacy-first**: No accounts, no cloud storage, no analytics, no ads. Everything stays on device.
 
+### App Flow
+
+Single-screen vertical swipe navigation (`lib/screens/session_screen.dart`): each session step is a full-screen card in a `PageView`. Swipe up (or tap the arrow) advances; swipe down revisits history.
+
+```
+Start → Timer → Completion → (Timer → Completion …) → Break → Start … → Summary
+                     ↳ "all done" → Summary        ↳ "all done" → Summary
+```
+
+Cards live in `lib/widgets/` (`completion_card.dart`, `break_card.dart`, `summary_card.dart`). Step types are defined in `lib/models/session_step.dart`.
+
 ### Key Technical Components
 
 **Timer System:**
-- Count-up timer running invisibly in background
-- Must handle app backgrounding/foregrounding gracefully
-- Precise timing critical for session tracking
-- Use WorkManager (Android) / Background Tasks (iOS) for reliability
+- Count-up timer, hidden during work; elapsed time derived from the wall clock (`TimerService`), not tick counting, so background throttling doesn't corrupt timings
+- Break countdown is derived from an end timestamp for the same reason
+- Future native work: WorkManager (Android) / Background Tasks (iOS), wake locks
 
 **Animation Layer:**
-- MVP: Breathing circle with 4-7-8 pattern (4s expand, 7s hold, 8s contract)
-- Must maintain 60fps performance on all devices
-- CustomPainter + AnimationController approach
-- Battery efficiency critical for long homework sessions
+- Breathing circle with 4-7-8 pattern (4s expand, 7s hold, 8s contract) over a 19s cycle, plus a slow ambient orb background
+- 60fps target; background lives in its own `RepaintBoundary`
+- Respects OS reduced-motion setting (renders static when disabled)
 
 **Break Activity System:**
-- 50+ activities in MVP, 100+ in v1.1
-- Random selection with history tracking (avoid repeats within session)
-- Unlimited refresh, limited skip (2 per session)
-- Activities must be: quick (20-60s), silly, physical, low-prep
+- 50 activities in `assets/data/activities.json`, 5 categories (physical, silly, creative, breathing, low-energy)
+- Random selection with history tracking (last 10 avoided, full-pool fallback)
+- Single break-duration setting (10s/30s/60s); suggestions are flexible, no skip/refresh buttons
 
 **Data Persistence:**
-- Local-only storage using Hive or SharedPreferences
-- Session state (in-memory, cleared on end)
-- Break activity history (last 10 to avoid repeats)
-- Optional parent insights (local device only)
+- Minimal by design: only `breakDuration` persists (SharedPreferences)
+- Session state (counts, timings, history) is in-memory and resets on restart
 
 ### State Management
-TBD - likely Provider or Riverpod. Choose based on:
-- Simplicity for timer state
-- Performance for 60fps animations
-- Ease of testing
+
+**Provider**, with four providers wired in `main.dart`:
+- `SessionState` (`ChangeNotifier`) — counts, progress, per-question times, break duration
+- `TimerService` (`ChangeNotifier`) — timer lifecycle, wall-clock elapsed, formatting
+- `ActivityService` (plain provider) — activity pool, loaded once at startup
+- `SoundService` (plain provider) — pop/chime/ding playback (native: audioplayers, web: Audio API)
 
 ## Voice, Tone & Copy Guidelines
 
@@ -123,46 +130,48 @@ When writing user-facing text, always follow these rules:
 ## Critical Technical Challenges
 
 1. **Background Timer Accuracy**
-   - Timer must continue accurately when app is backgrounded
+   - Wall-clock-derived elapsed time keeps web timings honest under tab throttling
    - Handle interruptions (calls, notifications) gracefully
-   - Balance precision vs battery life
+   - Native background tasks still needed for true background operation (v2.0)
 
 2. **Animation Performance**
    - Smooth 60fps breathing circle on all devices (phone to tablet)
    - Low battery impact during extended sessions
-   - Scalable across screen sizes
+   - Scalable across screen sizes (see `AppTheme.scaleFactor`)
 
 3. **Accessibility**
-   - Screen reader support (Semantics widgets throughout)
-   - Color blind friendly palette
-   - Reduced motion support for breathing circle
-   - Adjustable animation intensity
+   - Screen reader labels on navigation arrows and countdowns (Text content is read by default)
+   - Color blind friendly palette (Catppuccin Mocha)
+   - Reduced motion support for ambient animations
+   - Large tap targets, high contrast
 
-## Dependencies (Planned)
+## Dependencies
 
 **Core:**
-- `provider` or `riverpod` - State management
-- `hive` or `shared_preferences` - Local data persistence
+- `provider` (^6.1.0) - State management
+- `shared_preferences` (^2.2.0) - Break-duration setting persistence
+- `audioplayers` (^6.5.1) - Sound effects on native platforms
 
-**Features:**
-- `flutter_local_notifications` - Break reminders (v1.1+)
-- `workmanager` - Background timer management
-- `audioplayers` - Sound effects (v1.1+)
+**Dev:**
+- `flutter_test` - Testing framework
+- `flutter_lints` (^6.0.0) - Linting rules
 
 Keep dependencies minimal for app size and simplicity.
 
-## File Structure (To Be Established)
+## File Structure
 
-Recommended structure once initialized:
 ```
 lib/
-├── main.dart
-├── models/           # Session, Activity, UserPreferences
-├── services/         # TimerService, StorageService, ActivityService
-├── screens/          # Onboarding, Timer, Break, Completion
-├── widgets/          # BreathingCircle, ProgressIndicator
-├── theme/            # Colors, typography, spacing
-└── utils/            # Constants, helpers
+├── main.dart             # App entry point, provider setup
+├── models/               # SessionState, SessionStep, BreakActivity
+├── services/             # TimerService, ActivityService, SoundService (native/web)
+├── screens/              # SessionScreen (single-screen PageView flow)
+├── widgets/              # Cards, BreathingCircle, AmbientBackground, AdvanceArrow, ...
+└── theme/                # AppTheme (Catppuccin Mocha palette, type, scaling)
+test/                     # Unit tests per service/model + widget tests
+assets/
+├── data/activities.json  # 50 break activities
+└── sounds/               # chime.wav, ding.wav, pop.wav
 ```
 
 ## Development Principles
@@ -174,6 +183,10 @@ lib/
 5. **Fail Gracefully**: If something breaks, reset cleanly - never make kids feel bad
 
 ## Platform-Specific Notes
+
+**Web (current target):**
+- Deployed automatically to GitHub Pages on every `main` push (`.github/workflows/pages.yml`)
+- PWA manifest enables "Add to Home Screen"
 
 **iOS Builds from Windows:**
 - Use Codemagic or App Center for cloud builds
@@ -187,12 +200,15 @@ lib/
 
 ## Open Design Questions
 
-These need resolution during development:
+Resolved since the MVP design (kept for context):
+- ~~Completion Reveal~~: shows elapsed time + progress counter; session summary adds per-question recap
+- ~~Session End~~: explicit "all done" button on completion/break cards → summary card
+- ~~Skip Limits~~: no skip buttons; break suggestions are flexible by design
 
-1. **Break Cadence**: Is 5 questions right for all ages? Should it be configurable?
-2. **Completion Reveal**: Just show time, or add context? Make it optional?
-3. **Skip Limits**: 2 per session? Reset after breaks?
-4. **Session End**: Explicit "End session" button or just close app?
+Still open:
+1. **Break Cadence**: Is 5 questions right for all ages? Should it be configurable? (Break *duration* is now configurable: 10s/30s/60s.)
+2. **Question variation**: Should very quick (<30s) or very long (>10min) questions be handled differently?
+3. **Activity refresh**: Do kids want a "different activity" button even though suggestions are flexible?
 
 When implementing features that touch these areas, consider discussing approach first.
 
@@ -223,11 +239,6 @@ Learning curve: ~2-3 days to productivity with Claude assistance.
 
 ## Current Status
 
-**Project is in initial setup phase.** No Flutter project structure exists yet. README contains comprehensive product requirements and vision.
+**Working app, deployed to GitHub Pages.** Swipe-navigation session flow (start → timer → completion → break → summary), wall-clock timer, 4-7-8 breathing animation, 50 break activities, sounds/haptics, dark Catppuccin Mocha theme. Unit + widget tests with a CI gate (`flutter analyze` + `flutter test` before deploy).
 
-First steps:
-1. Initialize Flutter project: `flutter create chunk`
-2. Set up state management
-3. Implement breathing circle animation (MVP focus)
-4. Build timer system with background handling
-5. Create break activity database
+Next horizons (see README "What's Next"): v1.1 experience polish (animation styles, sound toggle, activity refresh, 100+ activities), v2.0 native apps with true background timer support.

@@ -16,6 +16,7 @@ class _AmbientBackgroundState extends State<AmbientBackground>
   late Animation<double> _animA;
   late Animation<double> _animB;
   late final List<_AmbientOrbConfig> _orbs;
+  bool _animationsStarted = false;
 
   @override
   void initState() {
@@ -76,9 +77,19 @@ class _AmbientBackgroundState extends State<AmbientBackground>
     _animB = Tween<double>(begin: 0.0, end: 1.0)
         .chain(CurveTween(curve: Curves.easeInOut))
         .animate(_driftB);
+  }
 
-    _driftA.repeat(reverse: true);
-    _driftB.repeat(reverse: true);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // MediaQuery isn't available in initState; start the loops here unless
+    // the OS requests reduced motion.
+    if (_animationsStarted) return;
+    _animationsStarted = true;
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      _driftA.repeat(reverse: true);
+      _driftB.repeat(reverse: true);
+    }
   }
 
   @override
@@ -90,6 +101,17 @@ class _AmbientBackgroundState extends State<AmbientBackground>
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      // Static frame when reduced motion is requested.
+      return CustomPaint(
+        painter: _AmbientOrbPainter(
+          orbs: _orbs,
+          valueA: 0.5,
+          valueB: 0.5,
+        ),
+        size: Size.infinite,
+      );
+    }
     return AnimatedBuilder(
       animation: Listenable.merge([_animA, _animB]),
       builder: (context, child) {

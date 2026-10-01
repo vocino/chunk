@@ -14,19 +14,30 @@ void main() async {
   final activityService = ActivityService();
   await activityService.loadActivities();
 
-  runApp(MyApp(activityService: activityService));
+  // Restore persisted settings on startup
+  final sessionState = SessionState();
+  await sessionState.loadPreferences();
+
+  runApp(
+    MyApp(activityService: activityService, sessionState: sessionState),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final ActivityService activityService;
+  final SessionState sessionState;
 
-  const MyApp({super.key, required this.activityService});
+  const MyApp({
+    super.key,
+    required this.activityService,
+    required this.sessionState,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SessionState()),
+        ChangeNotifierProvider.value(value: sessionState),
         ChangeNotifierProvider(create: (_) => TimerService()),
         Provider.value(value: activityService),
         Provider(create: (_) => SoundService()),

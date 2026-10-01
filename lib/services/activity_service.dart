@@ -4,8 +4,12 @@ import 'package:flutter/services.dart';
 import '../models/break_activity.dart';
 
 class ActivityService {
-  List<BreakActivity> _activities = [];
-  final Random _random = Random();
+  List<BreakActivity> _activities;
+  final Random _random;
+
+  ActivityService({List<BreakActivity>? activities, Random? random})
+      : _activities = activities ?? [],
+        _random = random ?? Random();
 
   Future<void> loadActivities() async {
     final String jsonString = await rootBundle.loadString('assets/data/activities.json');
