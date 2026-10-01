@@ -146,7 +146,7 @@ Uses `provider` for state management with four providers:
 - **Timer card**: Breathing circle animation (4-7-8 pattern, 19s cycle), timer hidden
 - **Completion card**: Shows elapsed time ("03:24") and progress ("2 more until break")
 - **Break system**: Triggers automatically after 5 questions, with random activity suggestion
-- **Break card**: Countdown with activity idea, early "back to work" exit
+- **Break card**: Countdown with activity idea, "something else" refresh, early "back to work" exit
 - **Summary card**: End-of-session recap with per-question times and total ("all done")
 - **Sound + haptics**: Subtle feedback on completion, break start, and break end
 - **Activity pool**: 50 varied activities with anti-repeat logic
@@ -171,7 +171,7 @@ Uses `provider` for state management with four providers:
 **v1.1 - Enhanced Experience:**
 - Multiple animation styles (wave, particles, gradient)
 - Sound effects toggle
-- Activity refresh/skip buttons
+- Activity skip button ("something else" refresh shipped)
 - Extended activity pool (100+ activities)
 
 **v2.0 - Native Apps:**

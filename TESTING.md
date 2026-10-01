@@ -31,7 +31,7 @@ CI (`.github/workflows/pages.yml`) runs `flutter analyze` and `flutter test` on 
 | File | Covers |
 |---|---|
 | `test/widget_test.dart` | App launches on the "Ready?" start card |
-| `test/card_widget_test.dart` | Completion card shows the formatted time and "N more until break", tap advances; break card counts down from its end timestamp, early "back to work" tap exits |
+| `test/card_widget_test.dart` | Completion card shows the formatted time and "N more until break", tap advances; break card counts down from its end timestamp, early "back to work" tap exits; refresh swaps in a different activity |
 | `test/desktop_input_test.dart` | Mouse drag, mouse click, and scroll wheel advance start → timer |
 
 Sound-producing paths (break auto-complete, page-change chimes) are deliberately not exercised in widget tests — `audioplayers` has no platform implementation under `flutter test`.

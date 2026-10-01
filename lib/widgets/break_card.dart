@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/break_activity.dart';
 import '../models/session_state.dart';
+import '../services/activity_service.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
 import 'advance_arrow.dart';
@@ -30,6 +31,7 @@ class _BreakCardState extends State<BreakCard> {
   late int _duration;
   late int _remainingSeconds;
   late DateTime _endTime;
+  late BreakActivity _currentActivity;
   Timer? _countdownTimer;
 
   DateTime _now() => widget.now != null ? widget.now!() : DateTime.now();
@@ -38,6 +40,7 @@ class _BreakCardState extends State<BreakCard> {
   void initState() {
     super.initState();
     _duration = context.read<SessionState>().breakDuration;
+    _currentActivity = widget.activity;
     _remainingSeconds = _duration;
     _endTime = _now().add(Duration(seconds: _duration));
     _countdownTimer =
@@ -60,6 +63,18 @@ class _BreakCardState extends State<BreakCard> {
         _remainingSeconds = remaining.clamp(0, _duration).toInt();
       });
     }
+  }
+
+  void _refreshActivity() {
+    final sessionState = context.read<SessionState>();
+    final activityService = context.read<ActivityService>();
+    final next = activityService.getRandomActivity(
+      [...sessionState.recentActivityIds, _currentActivity.id],
+    );
+    sessionState.addRecentActivity(next.id);
+    setState(() {
+      _currentActivity = next;
+    });
   }
 
   @override
@@ -113,10 +128,24 @@ class _BreakCardState extends State<BreakCard> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppTheme.spaceMD),
-                  Text(
-                    '${widget.activity.emoji} ${widget.activity.text}',
-                    style: AppTheme.activity(context),
-                    textAlign: TextAlign.center,
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Text(
+                      '${_currentActivity.emoji} ${_currentActivity.text}',
+                      key: ValueKey(_currentActivity.id),
+                      style: AppTheme.activity(context),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spaceSM),
+                  TextButton(
+                    onPressed: _refreshActivity,
+                    child: Text(
+                      'something else',
+                      style: AppTheme.label(context).copyWith(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ),
                 ],
               ),
