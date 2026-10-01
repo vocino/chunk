@@ -204,11 +204,12 @@ Resolved since the MVP design (kept for context):
 - ~~Completion Reveal~~: shows elapsed time + progress counter; session summary adds per-question recap
 - ~~Session End~~: explicit "all done" button on completion/break cards → summary card
 - ~~Skip Limits~~: no skip buttons; break suggestions are flexible by design
+- ~~Activity refresh~~: "something else" button on the break card (unlimited, anti-repeat)
 
 Still open:
 1. **Break Cadence**: Is 5 questions right for all ages? Should it be configurable? (Break *duration* is now configurable: 10s/30s/60s.)
 2. **Question variation**: Should very quick (<30s) or very long (>10min) questions be handled differently?
-3. **Activity refresh**: Do kids want a "different activity" button even though suggestions are flexible?
+
 
 When implementing features that touch these areas, consider discussing approach first.
 

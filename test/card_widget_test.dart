@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:chunk/models/break_activity.dart';
 import 'package:chunk/models/session_state.dart';
+import 'package:chunk/services/activity_service.dart';
 import 'package:chunk/services/sound_service.dart';
 import 'package:chunk/widgets/break_card.dart';
 import 'package:chunk/widgets/completion_card.dart';
@@ -177,6 +178,61 @@ void main() {
       await tester.tap(find.text('back to work'));
       await _pumpUntilAdvance(tester, () => completed);
       expect(completed, isTrue);
+    });
+
+    testWidgets('refresh swaps in a different activity', (
+      WidgetTester tester,
+    ) async {
+      _setPhoneViewport(tester);
+      final first = BreakActivity(
+        id: 'a1',
+        text: 'Do 10 jumping jacks',
+        emoji: '🤸',
+        category: 'physical',
+      );
+      final second = BreakActivity(
+        id: 'a2',
+        text: 'Touch your toes',
+        emoji: '🦶',
+        category: 'physical',
+      );
+      final now = DateTime(2026, 1, 1, 12);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => SessionState()),
+              Provider(create: (_) => SoundService()),
+              Provider(
+                create: (_) => ActivityService(activities: [first, second]),
+              ),
+            ],
+            child: BreakCard(
+              activity: first,
+              onComplete: () {},
+              onDone: () {},
+              now: () => now,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.textContaining('Do 10 jumping jacks'), findsOneWidget);
+
+      // Two-item pool with the current one excluded: the swap is deterministic.
+      // Pump until the outgoing child is gone — the tap, the 300ms fade, and
+      // the switcher's removal each need frames.
+      await tester.tap(find.text('something else'));
+      for (var i = 0;
+          i < 10 &&
+              find.textContaining('Do 10 jumping jacks').evaluate().isNotEmpty;
+          i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+
+      expect(find.textContaining('Touch your toes'), findsOneWidget);
+      expect(find.textContaining('Do 10 jumping jacks'), findsNothing);
     });
   });
 }
