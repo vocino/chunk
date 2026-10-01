@@ -25,3 +25,7 @@ devtools_options.yaml
 
 # Worktrees
 .worktrees/
+
+# Project-local Flutter SDK + pub cache (see README dev setup)
+.flutter/
+.pub-cache/

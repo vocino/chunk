@@ -78,37 +78,101 @@ class AppTheme {
     return (shortestSide / 390).clamp(0.85, 1.6);
   }
 
-  // Base text styles (unscaled, for ThemeData)
-  static const TextStyle _headingLarge = TextStyle(
-    fontSize: 48,
-    fontWeight: FontWeight.w300,
+  // Spacing scale (logical px, pre-scale). Prefer these over ad-hoc values.
+  static const double spaceXS = 8;
+  static const double spaceSM = 12;
+  static const double spaceMD = 16;
+  static const double spaceLG = 24;
+  static const double spaceXL = 32;
+  static const double spaceXXL = 48;
+
+  // Typeface. Bundled (see pubspec + assets/fonts/OFL.txt) so the app renders
+  // identically offline. Only 400/600/700/800 ship — keep every TextStyle on
+  // those weights.
+  static const String fontFamily = 'Nunito';
+
+  // Base text styles (unscaled, for ThemeData). Hierarchy, top to bottom:
+  // display (hero) > numerals (hero times) > title (card titles) >
+  // activity (break suggestion) > body (info) > label (actions) >
+  // caption (micro-labels). Small text stays on subtext0 or brighter so it
+  // never drops below ~4.5:1 on the base background.
+  static const TextStyle _display = TextStyle(
+    fontSize: 52,
+    fontWeight: FontWeight.w800,
     color: text,
-    height: 1.2,
+    height: 1.05,
+    letterSpacing: -0.5,
   );
 
-  static const TextStyle _headingMedium = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.w400,
+  static const TextStyle _numerals = TextStyle(
+    fontSize: 76,
+    fontWeight: FontWeight.w700,
+    color: text,
+    height: 1.0,
+    letterSpacing: -0.8,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
+  static const TextStyle _title = TextStyle(
+    fontSize: 34,
+    fontWeight: FontWeight.w700,
+    color: text,
+    height: 1.1,
+    letterSpacing: -0.25,
+  );
+
+  static const TextStyle _activity = TextStyle(
+    fontSize: 26,
+    fontWeight: FontWeight.w600,
     color: text,
     height: 1.3,
   );
 
-  static const TextStyle _bodyLarge = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w300,
+  static const TextStyle _body = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w400,
     color: text,
     height: 1.4,
   );
 
-  // Responsive text styles
-  static TextStyle headingLarge(BuildContext context) =>
-      _headingLarge.copyWith(fontSize: 48 * scaleFactor(context));
+  static const TextStyle _label = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: subtext0,
+    height: 1.3,
+    letterSpacing: 0.5,
+  );
 
-  static TextStyle headingMedium(BuildContext context) =>
-      _headingMedium.copyWith(fontSize: 32 * scaleFactor(context));
+  static const TextStyle _caption = TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: overlay2,
+    height: 1.3,
+    letterSpacing: 0.8,
+  );
 
-  static TextStyle bodyLarge(BuildContext context) =>
-      _bodyLarge.copyWith(fontSize: 24 * scaleFactor(context));
+  // Responsive text styles. Sizes scale with the viewport; tracking stays
+  // fixed so it never loosens into letterspacing soup on tablets.
+  static TextStyle display(BuildContext context) =>
+      _display.copyWith(fontSize: 52 * scaleFactor(context));
+
+  static TextStyle numerals(BuildContext context) =>
+      _numerals.copyWith(fontSize: 76 * scaleFactor(context));
+
+  static TextStyle title(BuildContext context) =>
+      _title.copyWith(fontSize: 34 * scaleFactor(context));
+
+  static TextStyle activity(BuildContext context) =>
+      _activity.copyWith(fontSize: 26 * scaleFactor(context));
+
+  static TextStyle body(BuildContext context) =>
+      _body.copyWith(fontSize: 20 * scaleFactor(context));
+
+  static TextStyle label(BuildContext context, [double size = 15]) =>
+      _label.copyWith(fontSize: size * scaleFactor(context));
+
+  static TextStyle caption(BuildContext context) =>
+      _caption.copyWith(fontSize: 13 * scaleFactor(context));
 
   // Button Style
   static final ButtonStyle primaryButtonStyle = ButtonStyle(
@@ -146,12 +210,16 @@ class AppTheme {
         surface: base,
       ),
       scaffoldBackgroundColor: base,
-      fontFamily: 'Roboto',
+      fontFamily: fontFamily,
       iconTheme: const IconThemeData(color: overlay1),
       textTheme: const TextTheme(
-        displayLarge: _headingLarge,
-        displayMedium: _headingMedium,
-        bodyLarge: _bodyLarge,
+        displayLarge: _display,
+        displayMedium: _numerals,
+        headlineMedium: _title,
+        titleLarge: _activity,
+        bodyLarge: _body,
+        labelLarge: _label,
+        labelMedium: _caption,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: primaryButtonStyle,

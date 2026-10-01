@@ -120,22 +120,22 @@ class _SummaryCardState extends State<SummaryCard>
                     opacity: _headingOpacity,
                     child: Text(
                       'Nice work!',
-                      style: AppTheme.headingMedium(context)
+                      style: AppTheme.title(context)
                           .copyWith(color: AppTheme.green),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppTheme.spaceMD),
                   FadeTransition(
                     opacity: _countOpacity,
                     child: Text(
                       '$n ${n == 1 ? 'question' : 'questions'} done',
-                      style: AppTheme.bodyLarge(context)
-                          .copyWith(color: AppTheme.overlay1),
+                      style: AppTheme.body(context)
+                          .copyWith(color: AppTheme.subtext1),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppTheme.spaceLG),
                   SlideTransition(
                     position: _listSlide,
                     child: FadeTransition(
@@ -154,15 +154,24 @@ class _SummaryCardState extends State<SummaryCard>
                                 children: [
                                   Text(
                                     'Q${i + 1}',
-                                    style: AppTheme.bodyLarge(context)
-                                        .copyWith(color: AppTheme.overlay1),
+                                    style: AppTheme.body(context).copyWith(
+                                      color: AppTheme.subtext0,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures()
+                                      ],
+                                    ),
                                   ),
                                   const Spacer(),
                                   Text(
                                     widget.formatElapsed(
                                         widget.questionTimes[i]),
-                                    style: AppTheme.bodyLarge(context)
-                                        .copyWith(color: AppTheme.subtext1),
+                                    style: AppTheme.body(context).copyWith(
+                                      color: AppTheme.subtext1,
+                                      fontWeight: FontWeight.w600,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures()
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -172,7 +181,7 @@ class _SummaryCardState extends State<SummaryCard>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppTheme.spaceMD),
                   SlideTransition(
                     position: _totalSlide,
                     child: FadeTransition(
@@ -180,21 +189,25 @@ class _SummaryCardState extends State<SummaryCard>
                       child: Column(
                         children: [
                           Divider(color: AppTheme.surface1),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppTheme.spaceSM),
                           Row(
                             children: [
                               Text(
                                 'Total time',
-                                style: AppTheme.bodyLarge(context).copyWith(
+                                style: AppTheme.body(context).copyWith(
                                   color: AppTheme.subtext1,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const Spacer(),
                               Text(
                                 totalFormatted,
-                                style: AppTheme.bodyLarge(context).copyWith(
+                                style: AppTheme.body(context).copyWith(
                                   color: AppTheme.text,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures()
+                                  ],
                                 ),
                               ),
                             ],

@@ -198,7 +198,10 @@ Chunk is a Flutter web application (deployed to GitHub Pages) designed with a cl
 - **Base**: `#1E1E2E`, accents: mauve `#CBA6F7`, teal `#94E2D5`, sapphire, sky, pink, green
 - Card-specific glow colors: green (completion/summary), pink (break)
 - **Responsive scaling**: `scaleFactor(context)` from shortest side, clamped 0.85–1.6
-- **Typography**: light-weight Roboto; heading 48, medium 32, body 24 (all scaled)
+- **Typeface**: Nunito (bundled, SIL OFL) in 400/600/700/800 — no synthesized weights
+- **Type roles** (base sizes, all scaled): display 52/800, numerals 76/700 tabular, title 34/700, activity 26/600, body 20/400, label 15/600 tracked, caption 13/600 tracked
+- **Text color floor**: small text stays on subtext0 or brighter (~4.5:1+ on base)
+- **Spacing scale**: 8/12/16/24/32/48 (`AppTheme.spaceXS`…`spaceXXL`)
 - Buttons: minimum 72px height, 16px radius, translucent mauve fill
 
 ## Data Flow

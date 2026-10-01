@@ -227,25 +227,17 @@ class _SessionScreenState extends State<SessionScreen> {
             Text(
               'Ready?',
               textAlign: TextAlign.center,
-              style: AppTheme.headingLarge(context).copyWith(color: AppTheme.mauve),
+              style: AppTheme.display(context).copyWith(color: AppTheme.mauve),
             ),
             const SizedBox(height: 8),
             Text(
               'One question at a time',
-              style: TextStyle(
-                fontSize: 16 * AppTheme.scaleFactor(context),
-                fontWeight: FontWeight.w400,
-                color: AppTheme.subtext0,
-              ),
+              style: AppTheme.body(context).copyWith(color: AppTheme.subtext0),
             ),
             const SizedBox(height: 24),
             Text(
               'break time',
-              style: TextStyle(
-                fontSize: 14 * AppTheme.scaleFactor(context),
-                fontWeight: FontWeight.w400,
-                color: AppTheme.overlay1,
-              ),
+              style: AppTheme.caption(context),
             ),
             const SizedBox(height: 12),
             BreakTimerSelector(
