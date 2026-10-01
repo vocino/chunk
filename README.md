@@ -22,6 +22,10 @@ Chunk is an ADHD-friendly homework helper that removes time pressure anxiety thr
 - Chrome or Edge (for web development)
 - VS Code or Android Studio (recommended)
 
+A project-local SDK also works: unzip the pinned Flutter release to `.flutter/`
+(gitignored) and run it as `.flutter/bin/flutter` with `PUB_CACHE` pointed at
+the gitignored `.pub-cache/` dir to keep caches off the system drive.
+
 ### Installation
 
 ```bash
@@ -80,6 +84,7 @@ lib/
 assets/
 ├── data/
 │   └── activities.json         # 50 break activities in 5 categories
+├── fonts/                      # Bundled Nunito 400/600/700/800 (+ OFL.txt)
 └── sounds/
     ├── chime.wav               # Break start
     ├── ding.wav                # Break end
