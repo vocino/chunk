@@ -22,13 +22,13 @@ class BreakTimerSelector extends StatelessWidget {
       children: [
         for (int i = 0; i < _options.length; i++) ...[
           if (i > 0) SizedBox(width: 12 * scale),
-          _buildPill(_options[i], scale),
+          _buildPill(context, _options[i], scale),
         ],
       ],
     );
   }
 
-  Widget _buildPill(int seconds, double scale) {
+  Widget _buildPill(BuildContext context, int seconds, double scale) {
     final isSelected = seconds == selectedDuration;
 
     return Semantics(
@@ -69,10 +69,8 @@ class BreakTimerSelector extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             '${seconds}s',
-            style: TextStyle(
-              fontSize: 14 * scale,
-              fontWeight: FontWeight.w400,
-              color: isSelected ? AppTheme.text : AppTheme.overlay1,
+            style: AppTheme.label(context, 14).copyWith(
+              color: isSelected ? AppTheme.text : AppTheme.subtext0,
             ),
           ),
         ),

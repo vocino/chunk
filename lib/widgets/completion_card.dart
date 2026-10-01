@@ -113,12 +113,12 @@ class _CompletionCardState extends State<CompletionCard>
                     opacity: _labelOpacity,
                     child: Text(
                       'That took',
-                      style:
-                          AppTheme.bodyLarge(context).copyWith(color: AppTheme.overlay1),
+                      style: AppTheme.body(context)
+                          .copyWith(color: AppTheme.subtext0),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spaceXS),
                   AnimatedBuilder(
                     animation: _revealController,
                     builder: (context, child) {
@@ -132,14 +132,13 @@ class _CompletionCardState extends State<CompletionCard>
                     },
                     child: Text(
                       widget.formattedTime,
-                      style: AppTheme.headingLarge(context).copyWith(
-                        fontSize: 72 * AppTheme.scaleFactor(context),
+                      style: AppTheme.numerals(context).copyWith(
                         color: AppTheme.green,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppTheme.spaceXL),
                   if (!widget.shouldBreak)
                     SlideTransition(
                       position: _counterSlide,
@@ -147,8 +146,8 @@ class _CompletionCardState extends State<CompletionCard>
                         opacity: _counterOpacity,
                         child: Text(
                           '${widget.questionsUntilBreak} more until break',
-                          style: AppTheme.bodyLarge(context)
-                              .copyWith(color: AppTheme.overlay1),
+                          style: AppTheme.body(context)
+                              .copyWith(color: AppTheme.subtext1),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -161,14 +160,13 @@ class _CompletionCardState extends State<CompletionCard>
               label: widget.shouldBreak ? 'break time' : 'ready',
               onTap: widget.onAdvance,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppTheme.spaceXS),
             TextButton(
               onPressed: widget.onDone,
               child: Text(
                 'all done',
-                style: AppTheme.bodyLarge(context).copyWith(
-                  color: AppTheme.overlay1,
-                  fontSize: 16 * AppTheme.scaleFactor(context),
+                style: AppTheme.label(context).copyWith(
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),

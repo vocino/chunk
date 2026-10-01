@@ -95,10 +95,10 @@ class _AdvanceArrowState extends State<AdvanceArrow>
                 children: [
                   Text(
                     widget.label,
-                    style: TextStyle(
-                      fontSize: (widget.enlarged ? 18 : 14) * AppTheme.scaleFactor(context),
-                      fontWeight: FontWeight.w400,
-                      color: AppTheme.overlay1,
+                    style: AppTheme.label(
+                      context,
+                      widget.enlarged ? 17 : 14,
+                    ).copyWith(
                       shadows: [
                         Shadow(
                           color: AppTheme.mauve.withValues(alpha: 0.3),

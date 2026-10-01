@@ -88,11 +88,11 @@ class _BreakCardState extends State<BreakCard> {
                 children: [
                   Text(
                     'Break time!',
-                    style:
-                        AppTheme.headingMedium(context).copyWith(color: AppTheme.pink),
+                    style: AppTheme.title(context)
+                        .copyWith(color: AppTheme.pink),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppTheme.spaceXXL),
                   Semantics(
                     liveRegion: true,
                     excludeSemantics: true,
@@ -100,28 +100,22 @@ class _BreakCardState extends State<BreakCard> {
                         'Break time remaining: $_remainingSeconds seconds',
                     child: Text(
                       '$_remainingSeconds',
-                      style: AppTheme.headingLarge(context).copyWith(
-                        fontSize: 72 * AppTheme.scaleFactor(context),
+                      style: AppTheme.numerals(context).copyWith(
                         color: AppTheme.sky,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppTheme.spaceXXL),
                   Text(
                     'How about:',
-                    style: AppTheme.bodyLarge(context).copyWith(
-                      fontSize: 20 * AppTheme.scaleFactor(context),
-                      color: AppTheme.overlay1,
-                    ),
+                    style: AppTheme.caption(context),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppTheme.spaceMD),
                   Text(
                     '${widget.activity.emoji} ${widget.activity.text}',
-                    style: AppTheme.headingMedium(context).copyWith(
-                      fontSize: 28 * AppTheme.scaleFactor(context),
-                    ),
+                    style: AppTheme.activity(context),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -132,7 +126,7 @@ class _BreakCardState extends State<BreakCard> {
               label: 'back to work',
               onTap: widget.onComplete,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppTheme.spaceXS),
             TextButton(
               onPressed: () {
                 _countdownTimer?.cancel();
@@ -140,9 +134,8 @@ class _BreakCardState extends State<BreakCard> {
               },
               child: Text(
                 'all done',
-                style: AppTheme.bodyLarge(context).copyWith(
-                  color: AppTheme.overlay1,
-                  fontSize: 16 * AppTheme.scaleFactor(context),
+                style: AppTheme.label(context).copyWith(
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
