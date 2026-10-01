@@ -56,7 +56,8 @@ class _BreakCardState extends State<BreakCard> {
       widget.onComplete();
     } else {
       setState(() {
-        _remainingSeconds = remaining.clamp(0, _duration);
+        // clamp() returns num; toInt() restores the static int type.
+        _remainingSeconds = remaining.clamp(0, _duration).toInt();
       });
     }
   }
