@@ -12,9 +12,6 @@ List<BreakActivity> _makeActivities(int count) => List.generate(
       ),
     );
 
-ActivityService _serviceWith(int count) =>
-    ActivityService(activities: _makeActivities(count));
-
 void main() {
   group('ActivityService — anti-repeat selection', () {
     test('getRandomActivity never returns a recently used activity', () {
