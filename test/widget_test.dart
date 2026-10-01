@@ -8,6 +8,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:chunk/main.dart';
+import 'package:chunk/models/session_state.dart';
 import 'package:chunk/services/activity_service.dart';
 
 void main() {
@@ -17,7 +18,9 @@ void main() {
     await activityService.loadActivities();
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(activityService: activityService));
+    await tester.pumpWidget(
+      MyApp(activityService: activityService, sessionState: SessionState()),
+    );
 
     // Verify that the start card is displayed with "Ready?" heading.
     expect(find.text('Ready?'), findsOneWidget);

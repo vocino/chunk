@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionState extends ChangeNotifier {
+  static const _breakDurationKey = 'breakDuration';
+  static const _defaultBreakDuration = 60;
+
   int _questionCount = 0;
   int _totalQuestions = 0;
-  int _breakDuration = 60;
+  int _breakDuration = _defaultBreakDuration;
   final List<String> _recentActivityIds = [];
   final List<int> _questionTimes = [];
   DateTime? _sessionStart;
@@ -17,9 +22,22 @@ class SessionState extends ChangeNotifier {
   int get totalSessionSeconds =>
       _sessionStart == null ? 0 : DateTime.now().difference(_sessionStart!).inSeconds;
 
+  /// Restores persisted settings. Called once at startup before runApp.
+  Future<void> loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    _breakDuration = prefs.getInt(_breakDurationKey) ?? _defaultBreakDuration;
+    notifyListeners();
+  }
+
   void setBreakDuration(int seconds) {
     _breakDuration = seconds;
     notifyListeners();
+    unawaited(_persistBreakDuration(seconds));
+  }
+
+  Future<void> _persistBreakDuration(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_breakDurationKey, seconds);
   }
 
   void incrementQuestion() {
