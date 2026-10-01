@@ -92,13 +92,19 @@ class _BreakCardState extends State<BreakCard> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
-                  Text(
-                    '$_remainingSeconds',
-                    style: AppTheme.headingLarge(context).copyWith(
-                      fontSize: 72 * AppTheme.scaleFactor(context),
-                      color: AppTheme.sky,
+                  Semantics(
+                    liveRegion: true,
+                    excludeSemantics: true,
+                    label:
+                        'Break time remaining: $_remainingSeconds seconds',
+                    child: Text(
+                      '$_remainingSeconds',
+                      style: AppTheme.headingLarge(context).copyWith(
+                        fontSize: 72 * AppTheme.scaleFactor(context),
+                        color: AppTheme.sky,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
                   Text(

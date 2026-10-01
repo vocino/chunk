@@ -229,6 +229,15 @@ class _SessionScreenState extends State<SessionScreen> {
               textAlign: TextAlign.center,
               style: AppTheme.headingLarge(context).copyWith(color: AppTheme.mauve),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'One question at a time',
+              style: TextStyle(
+                fontSize: 16 * AppTheme.scaleFactor(context),
+                fontWeight: FontWeight.w400,
+                color: AppTheme.subtext0,
+              ),
+            ),
             const SizedBox(height: 24),
             Text(
               'break time',

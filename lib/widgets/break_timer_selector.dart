@@ -31,44 +31,49 @@ class BreakTimerSelector extends StatelessWidget {
   Widget _buildPill(int seconds, double scale) {
     final isSelected = seconds == selectedDuration;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onChanged(seconds);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOut,
-        width: 64 * scale,
-        height: 40 * scale,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.mauve.withValues(alpha: 0.20)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20 * scale),
-          border: Border.all(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: 'Break length $seconds seconds',
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onChanged(seconds);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          width: 64 * scale,
+          height: 40 * scale,
+          decoration: BoxDecoration(
             color: isSelected
-                ? AppTheme.mauve.withValues(alpha: 0.35)
-                : AppTheme.overlay1.withValues(alpha: 0.3),
-            width: 1.0,
+                ? AppTheme.mauve.withValues(alpha: 0.20)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20 * scale),
+            border: Border.all(
+              color: isSelected
+                  ? AppTheme.mauve.withValues(alpha: 0.35)
+                  : AppTheme.overlay1.withValues(alpha: 0.3),
+              width: 1.0,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppTheme.mauve.withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppTheme.mauve.withValues(alpha: 0.08),
-                    blurRadius: 16,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : null,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          '${seconds}s',
-          style: TextStyle(
-            fontSize: 14 * scale,
-            fontWeight: FontWeight.w400,
-            color: isSelected ? AppTheme.text : AppTheme.overlay1,
+          alignment: Alignment.center,
+          child: Text(
+            '${seconds}s',
+            style: TextStyle(
+              fontSize: 14 * scale,
+              fontWeight: FontWeight.w400,
+              color: isSelected ? AppTheme.text : AppTheme.overlay1,
+            ),
           ),
         ),
       ),

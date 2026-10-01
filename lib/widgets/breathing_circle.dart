@@ -15,6 +15,7 @@ class _BreathingCircleState extends State<BreathingCircle>
   late AnimationController _driftController;
   late Animation<double> _breathAnimation;
   late Animation<double> _driftAnimation;
+  bool _animationsStarted = false;
 
   // Random offsets generated per instance
   late final List<_CircleConfig> _circles;
@@ -93,9 +94,19 @@ class _BreathingCircleState extends State<BreathingCircle>
     _driftAnimation = Tween<double>(begin: 0.0, end: 1.0)
         .chain(CurveTween(curve: Curves.easeInOut))
         .animate(_driftController);
+  }
 
-    _breathController.repeat();
-    _driftController.repeat(reverse: true);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // MediaQuery isn't available in initState; start the loops here unless
+    // the OS requests reduced motion.
+    if (_animationsStarted) return;
+    _animationsStarted = true;
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      _breathController.repeat();
+      _driftController.repeat(reverse: true);
+    }
   }
 
   @override
@@ -107,44 +118,54 @@ class _BreathingCircleState extends State<BreathingCircle>
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      // Static mid-breath frame when reduced motion is requested.
+      return Semantics(
+        label: 'Calm breathing animation',
+        child: _buildCircles(0.5, 0.5),
+      );
+    }
     return Semantics(
       label: 'Calm breathing animation',
       child: AnimatedBuilder(
         animation: Listenable.merge([_breathAnimation, _driftAnimation]),
         builder: (context, child) {
-          final p = _breathAnimation.value;
-          final d = _driftAnimation.value;
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final maxSize = min(constraints.maxWidth, constraints.maxHeight);
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  for (final c in _circles)
-                    _buildCircle(
-                      size: maxSize * (c.minScale + p * (c.maxScale - c.minScale)),
-                      color: c.color,
-                      opacity: c.baseOpacity,
-                      offset: Offset(
-                        cos(c.angle) * maxSize * c.spread * p +
-                            cos(c.driftAngle) * maxSize * c.driftAmount * d,
-                        sin(c.angle) * maxSize * c.spread * p +
-                            sin(c.driftAngle) * maxSize * c.driftAmount * d,
-                      ),
-                    ),
-                  // Center circle stays fixed
-                  _buildCircle(
-                    size: maxSize * (0.2 + p * 0.4),
-                    color: AppTheme.foreground,
-                    opacity: 0.06 + p * 0.06,
-                    offset: Offset.zero,
-                  ),
-                ],
-              );
-            },
-          );
+          return _buildCircles(_breathAnimation.value, _driftAnimation.value);
         },
       ),
+    );
+  }
+
+  Widget _buildCircles(double progress, double drift) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxSize = min(constraints.maxWidth, constraints.maxHeight);
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            for (final c in _circles)
+              _buildCircle(
+                size: maxSize *
+                    (c.minScale + progress * (c.maxScale - c.minScale)),
+                color: c.color,
+                opacity: c.baseOpacity,
+                offset: Offset(
+                  cos(c.angle) * maxSize * c.spread * progress +
+                      cos(c.driftAngle) * maxSize * c.driftAmount * drift,
+                  sin(c.angle) * maxSize * c.spread * progress +
+                      sin(c.driftAngle) * maxSize * c.driftAmount * drift,
+                ),
+              ),
+            // Center circle stays fixed
+            _buildCircle(
+              size: maxSize * (0.2 + progress * 0.4),
+              color: AppTheme.foreground,
+              opacity: 0.06 + progress * 0.06,
+              offset: Offset.zero,
+            ),
+          ],
+        );
+      },
     );
   }
 

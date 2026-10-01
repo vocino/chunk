@@ -78,45 +78,49 @@ class _AdvanceArrowState extends State<AdvanceArrow>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: ScaleTransition(
-          scale: _tapScale,
-          child: SlideTransition(
-            position: _bounceAnimation,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  widget.label,
-                  style: TextStyle(
-                    fontSize: (widget.enlarged ? 18 : 14) * AppTheme.scaleFactor(context),
-                    fontWeight: FontWeight.w400,
-                    color: AppTheme.overlay1,
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        onTap: _handleTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: ScaleTransition(
+            scale: _tapScale,
+            child: SlideTransition(
+              position: _bounceAnimation,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontSize: (widget.enlarged ? 18 : 14) * AppTheme.scaleFactor(context),
+                      fontWeight: FontWeight.w400,
+                      color: AppTheme.overlay1,
+                      shadows: [
+                        Shadow(
+                          color: AppTheme.mauve.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: (widget.enlarged ? 48 : 32) * AppTheme.scaleFactor(context),
+                    color: AppTheme.text,
                     shadows: [
                       Shadow(
-                        color: AppTheme.mauve.withValues(alpha: 0.3),
-                        blurRadius: 8,
+                        color: AppTheme.mauve.withValues(alpha: 0.2),
+                        blurRadius: 12,
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 4),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  size: (widget.enlarged ? 48 : 32) * AppTheme.scaleFactor(context),
-                  color: AppTheme.text,
-                  shadows: [
-                    Shadow(
-                      color: AppTheme.mauve.withValues(alpha: 0.2),
-                      blurRadius: 12,
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
